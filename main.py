@@ -288,14 +288,17 @@ def main():
                 [eg.Text('Study To Do (学习待办)')],
                 [eg.Text('版本: '+ver)],
                 [eg.Text('By Moemu')],
-                [eg.Text('特别感谢: ')],
+                [eg.Text('特别感谢: ',font=('微软雅黑 13'))],
                 [eg.Text('Teacher Xie (提供部分改进建议和BUG反馈)')],
                 [eg.Text('Mr Zhu (手气不错,测试出几个漏洞)')],
                 [eg.Text('A High-School Student (帮忙测试的学长)')],
+                [eg.Text('版权声明:',font=('微软雅黑 13'))],
+                [eg.Text('本程序是自由软件：\n你可以再分发之和/或依照由自由软件基金会发布的 GNU 通用公共许可证修改之，\n无论是版本 3 许可证，还是（按你的决定）任何以后版都可以。\n发布该程序是希望它能有用,但是并无保障;甚至连可销售和符合某个特定的目的都不保证。')],
+                [eg.Text('请参看 GNU 通用公共许可证。'),sg.Text('了解详情',font=('微软雅黑 10'),text_color='blue',enable_events=True,key='licenses')],
                 [sg.VPush()],
                 [eg.back()]
             ]
-            windows=sg.Window('关于页面',layout=layout,size=(350,350),icon='ico/LOGO.ico')
+            windows=sg.Window('关于页面',layout=layout,size=(550,450),icon='ico/LOGO.ico',resizable=True)
             event,value=windows.Read()
             windows.Close()
         elif event=='帮助文档':
