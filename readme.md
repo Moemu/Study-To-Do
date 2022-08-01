@@ -54,4 +54,4 @@ Study To Do Copyright (C) 2021-2022 Moemu
 
 本程序是自由软件；你可以再分发之和/或依照由自由软件基金会发布的 GNU 通用公共许可证修改之，无论是版本 3 许可证，还是（按你的决定）任何以后版都可以。
 
-发布该程序是希望它能有用,但是并无保障;甚至连可销售和符合某个特定的目的都不保证。[了解详情]([Study-To-Do/License at main · WhitemuTeam/Study-To-Do (github.com)](https://github.com/WhitemuTeam/Study-To-Do/blob/main/License))
+发布该程序是希望它能有用,但是并无保障;甚至连可销售和符合某个特定的目的都不保证。[了解详情](https://github.com/WhitemuTeam/Study-To-Do/blob/main/License)
