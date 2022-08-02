@@ -116,52 +116,6 @@ def default_sen(mode:str) -> None:
         with open('data/hitokoto.txt','w',encoding='utf-8') as f:
             f.writelines(hitokoto)
 
-class Easy_GUI:
-    '''
-    更便捷地添加PySimpleGUI元素
-    '''
-    def Text(text,font=('微软雅黑 10'),size=(None, None),justification=None,text_color=None):
-        return sg.Text(text,font=font,size=size,justification=justification,text_color=text_color)
-    def InputCombo(text,font=('微软雅黑 10'),size=(None, None),default_value=None):
-        return sg.InputCombo(text,font=font,size=size,default_value=default_value)
-    def FolderBrowse(text,font=('微软雅黑 10'),size=(None, None)):
-        return sg.FolderBrowse(text,font=font,size=size)
-    def Button(text,font=('微软雅黑 10'),size=(None, None),key=None):
-        return sg.Button(text,font=font,size=size,key=key)
-    def back():
-        return sg.Button(tooltip='返回',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/back.png',key='返回')
-    def Popup(text:str,title='提示',font=('微软雅黑 10'),confirm=False):
-        layout = [
-            [sg.Text(text,font=font)]
-        ]
-        if confirm:
-            layout.append([sg.Button('确定'),sg.Push(),sg.Button('取消')])
-        else:
-            layout.append([sg.Push(),Easy_GUI.back()])
-        window = sg.Window('提示',layout=layout,font=font)
-        event,value = window.Read()
-        window.Close()
-        if confirm == True:
-            if event == '确定':
-                return True
-            else:
-                return False
-        return event
-    def done_round():
-        return sg.Button(tooltip='完成',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/done-info.png',key='完成')
-    def Button_image(path=None,key=None):
-        return sg.Button(tooltip=key,button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename=path,key=key)
-    def Window(title,layout,size=(None,None),font=None):
-        return sg.Window(title,layout=layout,icon='ico/LOGO.ico',size=size,font=font)
-    def Input():
-        return sg.Input()
-    def push():
-        return sg.Push()
-    def Vpush():
-        return sg.VPush()
-    def WIN_CLOSED():
-        return sg.WIN_CLOSED
-
 class progress():
     '''
     进度条服务
@@ -256,7 +210,7 @@ def Run_check():
         os.mkdir('data')
     #ico文件夹检查
     if os.path.isdir('ico')==False:
-        Easy_GUI.Popup('依赖文件丢失,请重新安装Study To Do')
+        sg.Popup('依赖文件丢失,请重新安装Study To Do')
         os._exit(0)
     #设置文件检查
     if os.path.isfile('data/setting.json')==False:

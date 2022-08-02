@@ -219,7 +219,6 @@ def summary():
     '''
     import json,os
     import PySimpleGUI as sg
-    from tool import Easy_GUI as eg
     from tool import list_to_str,Early_time_list,progress
     from datetime import datetime
     #---检查数据文件---
@@ -231,7 +230,7 @@ def summary():
             [sg.Text('预计用时: 3分钟')],
             [sg.Text('您想继续吗?'),sg.Push(),sg.Button('继续')]
         ]
-        window = eg.Window('数据收集提示',layout=layout,font=('微软雅黑 10'))
+        window = sg.Window('数据收集提示',layout=layout,font=('微软雅黑 10'))
         event, value = window.Read()
         window.Close()
         if event==sg.WIN_CLOSED:
@@ -243,7 +242,7 @@ def summary():
             [sg.Checkbox('化学',font=('微软雅黑 10')),sg.Checkbox('生物',font=('微软雅黑 10')),sg.Checkbox('地理',font=('微软雅黑 10')),sg.Checkbox('政治',font=('微软雅黑 10'))],
             [sg.Push(),sg.Button('下一步')]
         ]
-        window = eg.Window('数据收集(1/2)',layout=layout,font=('微软雅黑 10'))
+        window = sg.Window('数据收集(1/2)',layout=layout,font=('微软雅黑 10'))
         event, value = window.Read()
         window.Close()
         if event==sg.WIN_CLOSED:
@@ -259,7 +258,7 @@ def summary():
                     Choose_sub.append(All_sub[index_num])
                     for_times+=1
             if for_times!=3:
-                eg.Popup('请检查您的的选考科目是否等于3科')
+                sg.Popup('请检查您的的选考科目是否等于3科')
                 return None
         layout = [
             [sg.Text('必要的信息收集(2/2)',font=('微软雅黑 12'))],
@@ -267,7 +266,7 @@ def summary():
         for sub in Choose_sub:
             layout.append([sg.Text('科目: '+sub+'  级排名: '),sg.Input()])
         layout.append([sg.Push(),sg.Button('下一步')])
-        window = eg.Window('数据收集(2/2)',layout=layout,font=('微软雅黑 10'))
+        window = sg.Window('数据收集(2/2)',layout=layout,font=('微软雅黑 10'))
         event,value = window.Read()
         window.Close()
         if event == sg.WIN_CLOSED:
@@ -275,15 +274,15 @@ def summary():
         values = list(value.values())
         for point in values:
             if point =='':
-                eg.Popup('缺失数据或数据格式有误,请重新填写数据')
+                sg.Popup('缺失数据或数据格式有误,请重新填写数据')
                 return None
             try:
                 point=int(point)
                 if point <= 0:
-                    eg.Popup('级排名不能小于0,请重新填写数据')
+                    sg.Popup('级排名不能小于0,请重新填写数据')
                     return None
             except:
-                eg.Popup('缺失数据或数据格式有误,请重新填写数据')
+                sg.Popup('缺失数据或数据格式有误,请重新填写数据')
                 return None
         for i in range(len(values)):
             values[i]=round((1000-int(values[i]))/1000,2) #转换百分比(前:xx%)
@@ -299,7 +298,7 @@ def summary():
         print('Get score data -> ',data)
         with open('data/User_info.json','w') as f:
             f.write(json.dumps(data,sort_keys=True,indent=4,separators=(',', ': ')))
-        eg.Popup('感谢!所有的数据已收集完毕,现在让我们开始统计分析')
+        sg.Popup('感谢!所有的数据已收集完毕,现在让我们开始统计分析')
     #---分界线---
     Progress = progress()
     Progress.new()
@@ -315,7 +314,7 @@ def summary():
         data = json.loads(f.read())
     All_plan_stime = chart.get_data('D') #获取所有任务的开始时间
     if All_plan_stime == []:
-        eg.Popup('分析失败,创建1个带有任务限制的任务再试试吧')
+        sg.Popup('分析失败,创建1个带有任务限制的任务再试试吧')
         Progress.close()
         return None
     Early_time = Early_time_list(All_plan_stime)
@@ -327,7 +326,7 @@ def summary():
     all_Total_time=round(data['完成任务总用时'],2)
     all_frequency=data['完成的任务数']
     if all_frequency<3:
-        eg.Popup('完成的任务太少,还是多完成一些任务再来吧')
+        sg.Popup('完成的任务太少,还是多完成一些任务再来吧')
         return None
     print('Choose_sub -> ',Choose_sub)
     print('sub_score -> ',sub_score)
@@ -408,10 +407,10 @@ def summary():
         [sg.Text('以下是各科时间和成绩的比较雷达图,您可以结合着雷达图制定您的学习计划\n其中:"任务数量比"数据占比越大,所用时间越多; "年级排名比"数据占比越大,年级排名越靠前')],
         [sg.Image(r'data\各学科所占时间之比.png')],
         [sg.Text('注意:如果雷达图出现2层红色图层,请重启Study To Do')],
-        [sg.Push(),eg.back()]
+        [sg.Push(),sg.Button(tooltip='返回',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/back.png',key='返回')]
     ]
     Progress.close()
-    window = eg.Window('统计分析',layout=layout,font=('微软雅黑 10'))
+    window = sg.Window('统计分析',layout=layout,font=('微软雅黑 10'))
     event,value = window.Read()
     window.Close()
 

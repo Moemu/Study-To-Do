@@ -2,7 +2,6 @@ import pdfkit,os,subprocess
 from markdown import markdown
 import PySimpleGUI as sg
 from plan_manager import *
-from tool import Easy_GUI
 
 def wkhtmltox_check():
     try:
@@ -94,15 +93,14 @@ def txt_to_markdown_GUI():
     sub=value[0]
     File_path=value[1]
     if sub=='' or File_path=='':
-        from tool import Easy_GUI as eg
-        eg.Popup('任务范围/路径不可为空!')
+        sg.Popup('任务范围/路径不可为空!')
         return None
     if txt_to_markdown(sub,File_path)=='Error':
         return None
     layout=[
         [sg.Text('导出完成,已导出到 '+File_path+' 中',font=('微软雅黑 10'))],
         [sg.Text('请选择接下来的操作:',font=('微软雅黑 10'))],
-        [sg.Button('打开文件',font=('微软雅黑 10')),sg.Button('打开所在文件夹'),sg.Push(),Easy_GUI.back()]
+        [sg.Button('打开文件',font=('微软雅黑 10')),sg.Button('打开所在文件夹'),sg.Push(),sg.Button(tooltip='返回',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/back.png',key='返回')]
     ]
     done_window=sg.Window('导出完成',layout=layout,icon='ico/LOGO.ico',font=('微软雅黑 10'))
     event=done_window.Read()
@@ -135,8 +133,7 @@ def txt_to_PDF_GUI():
     sub=value[0]
     File_path=value[1]
     if sub=='' or File_path=='':
-        from tool import Easy_GUI as eg
-        eg.Popup('任务范围/路径不可为空!')
+        sg.Popup('任务范围/路径不可为空!')
         return None
     if txt_to_markdown(sub,File_path.replace('pdf','md'))=='Error':
         return None
@@ -145,7 +142,7 @@ def txt_to_PDF_GUI():
     layout=[
         [sg.Text('导出完成,已导出到 '+File_path+' 中')],
         [sg.Text('请选择接下来的操作:')],
-        [sg.Button('打开文件'),sg.Button('打开所在文件夹'),sg.Push(),Easy_GUI.back()]
+        [sg.Button('打开文件'),sg.Button('打开所在文件夹'),sg.Push(),sg.Button('返回')]
     ]
     done_window=sg.Window('导出完成',layout=layout,icon='ico/LOGO.ico')
     event=done_window.Read()
@@ -179,14 +176,13 @@ class plan_log:
         return ws
     
     def GUI():
-        from tool import Easy_GUI
         import sys,os
         path=os.getenv('APPDATA')+'\Study to do'
         file_path=(path+'\data\Plan_log.xlsx')
         print(file_path)
         layout=[
-            [Easy_GUI.Text('导出成功, 请到{}查看'.format(file_path))],
-            [Easy_GUI.Button('打开'),Easy_GUI.Button('打开文件夹'),sg.Push(),Easy_GUI.back()]
+            [sg.Text('导出成功, 请到{}查看'.format(file_path))],
+            [sg.Button('打开'),sg.Button('打开文件夹'),sg.Push(),sg.Button(tooltip='返回',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/back.png',key='返回')]
         ]
         Done_GUI=sg.Window('导出完成',layout=layout,icon='ico/LOGO.ico')
         event=Done_GUI.Read()

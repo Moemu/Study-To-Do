@@ -44,7 +44,6 @@ def GetTheme() -> str:
         return 'Reddit','white'
 
 def main():
-    from tool import Easy_GUI as eg
     import PySimpleGUI as sg
     import os
     showsen,showplan,size,backstage_status,DarkMode=read_setting()
@@ -52,9 +51,9 @@ def main():
         [sg.Text('设置',font=('微软雅黑 15'))],
         [sg.Text('主页面左上角显示句子设置',font=('微软雅黑 10')),sg.Push(),sg.InputCombo(['学习技巧','一言(本地)','日常问候语'],showsen,size=(12,5),font=('微软雅黑 10'))],
         [sg.Text('启动时显示的计划分类',font=('微软雅黑 10')),sg.Push(),sg.InputCombo(['全部','按科目-语文','按科目-数学','按科目-英语','按科目-物理','按科目-化学','按科目-生物','按科目-地理','按科目-历史','按科目-政治','按科目-体育','按分类-生活','按时间-当天','按时间-当周','按状态-已超时'],showplan,size=(12,5),font=('微软雅黑 10'))],
-        [sg.Text('主页面分辨率'),sg.Push(),eg.InputCombo(['500x500','600x600','650x650'],default_value=size)],
-        [sg.Text('任务提醒(需要管理员权限和开机自启)'),sg.Push(),eg.InputCombo(['开启','关闭'],default_value=backstage_status,size=(5,10))],
-        [sg.Text('深色模式'),sg.Push(),eg.InputCombo(['开启','关闭'],default_value=DarkMode,size=(5,10))],
+        [sg.Text('主页面分辨率'),sg.Push(),sg.InputCombo(['500x500','600x600','650x650'],default_value=size)],
+        [sg.Text('任务提醒(需要管理员权限和开机自启)'),sg.Push(),sg.InputCombo(['开启','关闭'],default_value=backstage_status,size=(5,10))],
+        [sg.Text('深色模式'),sg.Push(),sg.InputCombo(['开启','关闭'],default_value=DarkMode,size=(5,10))],
         [sg.VPush()],
         [sg.Button('保存',font=('微软雅黑 10'))]
     ]
@@ -76,7 +75,7 @@ def main():
             key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Microsoft\Windows\CurrentVersion\Run',0, win32con.KEY_ALL_ACCESS)
             win32api.RegSetValueEx(key,'Study to do',0,win32con.REG_SZ,path) # 写值（key, '项名', ...）
         except:
-            eg.Popup('保存设置失败,请用管理员模式打开本程序')
+            sg.Popup('保存设置失败,请用管理员模式打开本程序')
             backstage_status='关闭'
     if backstage_status!='开启' and backstage_status!=Oldbackstage_status:
         import win32api,win32con,os
@@ -84,10 +83,10 @@ def main():
             key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Microsoft\Windows\CurrentVersion\Run',0, win32con.KEY_ALL_ACCESS)
             win32api.RegSetValueEx(key,'Study to do',0,win32con.REG_SZ,'')
         except:
-            eg.Popup('保存设置失败,请用管理员模式打开本程序')
+            sg.Popup('保存设置失败,请用管理员模式打开本程序')
             backstage_status='开启'
     if showplan!=None or showsen!=None or backstage_status!=None or size!=None:
-        eg.Popup('保存设置成功!')
+        sg.rrPopup('保存设置成功!')
         save_setting(showsen,showplan,size,backstage_status,DarkMode)
     else:
         pass

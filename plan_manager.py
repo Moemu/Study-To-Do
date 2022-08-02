@@ -1,5 +1,6 @@
 import os,json
 from tool import check_time
+import PySimpleGUI as sg
 
 def time_get():
     mins=[]
@@ -105,7 +106,6 @@ def save_plan(txtname:str,sub:str,plan:str,
 
 def add_plan():
     import time,datetime
-    import PySimpleGUI as sg
     layout=[
         [sg.Text('科目:')],
         [sg.InputCombo(['语文','数学','英语','物理','历史','化学','生物','地理','政治','体育','生活','其他'],size=(12,5))],
@@ -307,8 +307,7 @@ def Complete_plan(num,mode='Now'):
             print('Homework Status -> ',check_plan_time(num))
             Finish_Homework(HomeworkID = get_plan_info(num,'HomeworkID'),Overtime = check_plan_time(num))
         except ConnectionError:
-            from tool import Easy_GUI as eg
-            eg.Popup('网络异常,请检查您的网络连接')
+            sg.Popup('网络异常,请检查您的网络连接')
             return None
     data['status']='已结束'
     with open('plan/'+txtname,'w') as f:
@@ -372,7 +371,6 @@ def change_plan(num):
     '''
     更改任务页面
     '''
-    import PySimpleGUI as sg
     from tool import split_time,repair_num
     txtname=os.listdir('plan')[int(num)]
     des,etime,status,stime,sub,plan=get_plan_info(num,'all')

@@ -1,7 +1,9 @@
 import leancloud,requests
+import PySimpleGUI as sg
 from plan_manager import *
 
-leancloud.init("", "") #自行配置Leancloud的APPID和APPKEY
+leancloud.init("", "") # 自行配置Leancloud的APPID和APPKEY
+sg.set_options(font=('微软雅黑 10'))
 
 def sign_up(User_name=None,password=None):
     account_service = leancloud.User()
@@ -157,79 +159,77 @@ def get_plans():
             save_plan(get_newplan_name(),sub,text,detail=des,status=status)
 
 def log_in_gui():
-    from tool import Easy_GUI as eg
     layout=[
-        [eg.Text('用户名')],
-        [eg.Input()],
-        [eg.Text('密码')],
-        [eg.Input()],
-        [eg.Button('登录'),eg.push(),eg.Button('注册')]
+        [sg.Text('用户名')],
+        [sg.Input()],
+        [sg.Text('密码')],
+        [sg.Input()],
+        [sg.Button('登录'),sg.push(),sg.Button('注册')]
     ]
-    lg=eg.Window('登录或注册',layout)
+    lg=sg.Window('登录或注册',layout,font=('微软雅黑 10'))
     event,value=lg.Read()
-    if event==eg.WIN_CLOSED():
+    if event==sg.WIN_CLOSED:
         return None
     Username=value[0]
     password=value[1]
     if Username=='' or password=='':
-        eg.Popup('用户名和密码不能为空!')
+        sg.Popup('用户名和密码不能为空!')
         return None
     if event=='登录':
         Status=log_in(Username,password)
         if not Status:
-            eg.Popup('登录失败,可能的原因为:\n1. 密码错误或用户名不存在\n2. 您输入密码的次数过多,请重试...')
+            sg.Popup('登录失败,可能的原因为:\n1. 密码错误或用户名不存在\n2. 您输入密码的次数过多,请重试...')
             lg.Close()
             return None
         elif Status=='TypeError':
-            eg.Popup('登录失败: 用户名无效')
+            sg.Popup('登录失败: 用户名无效')
             lg.Close()
             return None
         elif Status=='InternetError':
-            eg.Popup('登录失败: 请检查您的网络连接和代理设置')
+            sg.Popup('登录失败: 请检查您的网络连接和代理设置')
             lg.Close()
             return None
-        eg.Popup('登录成功...')
+        sg.Popup('登录成功...')
         lg.Close()
         save_key(Username,password)
         return None
     elif event=='注册':
         status=sign_up(Username,password)
         if status==False:
-            eg.Popup('注册失败: 用户名已经存在或用户名存在特殊字符')
+            sg.Popup('注册失败: 用户名已经存在或用户名存在特殊字符')
             lg.Close()
             return None
         elif status=='TypeError':
-            eg.Popup('注册失败: 用户名无效')
+            sg.Popup('注册失败: 用户名无效')
             lg.Close()
             return None
         elif status=='InternetError':
-            eg.Popup('注册失败: 请检查您的网络连接和代理设置')
+            sg.Popup('注册失败: 请检查您的网络连接和代理设置')
             lg.Close()
             return None
         Status=log_in(Username,password)
         if not Status:
-            eg.Popup('登录失败,可能的原因为:\n1. 密码错误或用户名不存在\n2. 您输入密码的次数过多,请重试...')
+            sg.Popup('登录失败,可能的原因为:\n1. 密码错误或用户名不存在\n2. 您输入密码的次数过多,请重试...')
             lg.Close()
             return None
         elif Status=='TypeError':
-            eg.Popup('登录失败: 用户名无效')
+            sg.Popup('登录失败: 用户名无效')
             lg.Close()
             return None
         elif Status=='InternetError':
-            eg.Popup('登录失败: 请检查您的网络连接和代理设置')
+            sg.Popup('登录失败: 请检查您的网络连接和代理设置')
             lg.Close()
             return None
-        eg.Popup('登录成功...')
+        sg.Popup('登录成功...')
         lg.Close()
         save_key(Username,password)
         return None
 
 def log_out():
-    from tool import Easy_GUI as eg
     from Student import Check_Class_Account
     import os
     if Check_Class_Account():
-        if eg.Popup('一旦登出,本地的作业文件将会删除,要继续吗?',confirm=True):
+        if sg.popup_yes_no('一旦登出,本地的作业文件将会删除,要继续吗?',title='确认') == 'Yes':
             from plan_manager import get_plan_info
             plan_list = os.listdir('plan')
             Remove_plan_list = []
@@ -242,4 +242,4 @@ def log_out():
         else:
             return None
     os.remove('data/key.json')
-    eg.Popup('已登出...')
+    sg.Popup('已登出...')

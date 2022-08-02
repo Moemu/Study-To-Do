@@ -2,7 +2,7 @@ import PySimpleGUI as sg
 import leancloud
 from account import log_in,read_key
 
-leancloud.init("", "") #自行配置Leancloud的APPID和APPKEY
+leancloud.init("","") # 自行配置Leancloud的APPID和APPKEY
 
 def Check_Class_Account():
     import json,os
@@ -65,7 +65,7 @@ def View_Class():
         [sg.Text('班级ID:',font=('微软雅黑 15')),sg.Text(Class_ID)],
         [sg.Text('班级成员:',font=('微软雅黑 15'))],
         [sg.Text(texts)],
-        [sg.Push(),eg.back()]
+        [sg.Push(),sg.Button(tooltip='返回',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/back.png',key='返回')]
     ]
     window = sg.Window('班级信息',layout=layout,font=('微软雅黑 10'))
     window.Read()
@@ -88,7 +88,7 @@ def Check_New_Homework():
     print('Homework_list -> ',Homework_list)
     #判断是否在作业列表中含有作业
     if Homework_list == []:
-        eg.Popup('没有新作业')
+        sg.Popup('没有新作业')
         return None
     HomeworkID_list = []
     for h in Homework_list:
@@ -107,7 +107,7 @@ def Check_New_Homework():
             HomeworkID_list.remove(h)
     print('Homework_list -> ',Homework_list)
     if HomeworkID_list == []:
-        eg.Popup('没有新作业')
+        sg.Popup('没有新作业')
         return None
     for hid in HomeworkID_list:
         Homework_list_services = leancloud.Object.extend('Homework_list') #定位到Homework_list类
@@ -119,7 +119,7 @@ def Check_New_Homework():
         etime = AHomework.get('etime')
         des = AHomework.get('des')
         save_plan(hid+'.json',sub,plan,stime,etime,des,HomeworkID=hid)
-    eg.Popup('有新的作业,请检查!')
+    sg.Popup('有新的作业,请检查!')
     return None
 
 def Finish_Homework(HomeworkID:str,Overtime:bool=False) -> None:

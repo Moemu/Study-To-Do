@@ -1,6 +1,6 @@
 '''
 BNS: Background notification service(后台通知服务)
-适用于Windows 8 或更高(不包括Windows 11)
+适用于Windows 8 或更高
 存放于程序主目录
 '''
 

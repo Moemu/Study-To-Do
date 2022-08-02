@@ -1,11 +1,10 @@
 from Statistics import *
 from plan_manager import *
-from tool import Easy_GUI as eg
 from Setting import read_setting,GetTheme
 from requests.exceptions import ConnectionError
 from datetime import datetime
 import PySimpleGUI as sg
-import random,time
+import random,time,webbrowser
 
 ver='3.0 - A new start'
 
@@ -127,17 +126,21 @@ def get_menu():
         ['帮助',['设置','帮助文档','检查更新','关于']]
         ]
     return menu
-    
+
+def Button_image(path=None,key=None):
+    return sg.Button(tooltip=key,button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename=path,key=key)
+
 def main():
     from tool import Run_check
     Run_check()
+    sg.set_options(font=('微软雅黑 10'),icon=('ico/LOGO.ico'))
     sg.theme(GetTheme()[0])
     showsen,showplan,size,backstage_status,DarkMode=read_setting()
     menu=get_menu()
     layout=[
         [sg.Menu(menu,font=('微软雅黑 8'),background_color=GetTheme()[1])],
-        [eg.Text('所有任务',font=('微软雅黑 15'))],
-        [eg.Text(choice_sen(showsen),font=('微软雅黑 8'))]
+        [sg.Text('所有任务',font=('微软雅黑 15'))],
+        [sg.Text(choice_sen(showsen),font=('微软雅黑 8'))]
         ]
     No_num=0
     try:
@@ -145,7 +148,7 @@ def main():
             txtname_list=read_plan_list() #传入计划列表
         else:
             txtname_list=read_plan_with_setting(showplan) #传入计划列表
-            layout[1]=[eg.Text('所有任务({})'.format(showplan.split('-')[1]),font=('微软雅黑 15'))]
+            layout[1]=[sg.Text('所有任务({})'.format(showplan.split('-')[1]),font=('微软雅黑 15'))]
         if txtname_list==[]:
             layout.append([sg.Image(filename='ico/empty-box.png')])
         else:
@@ -161,25 +164,25 @@ def main():
                         linelayout=[]
                         if check_plan_time(plan_name)==True:
                             #超时任务
-                            linelayout.append([eg.Text(str(No_num+1)+'. '+text,font=('微软雅黑 12'),text_color='red'),sg.Push(),
+                            linelayout.append([sg.Text(str(No_num+1)+'. '+text,font=('微软雅黑 12'),text_color='red'),sg.Push(),
                             sg.Button(tooltip='完成',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/done.png',key='w'+str(num)),
                             sg.Button(tooltip='查看',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/menu.png',key='c'+str(num))])
-                            linelayout.append([eg.Text(note(et),font=('微软雅黑 8'),text_color='red')])
+                            linelayout.append([sg.Text(note(et),font=('微软雅黑 8'),text_color='red')])
                         else:
                             #未超时任务
-                            linelayout.append([eg.Text(str(No_num+1)+'. '+text,font=('微软雅黑 12')),sg.Push(),
+                            linelayout.append([sg.Text(str(No_num+1)+'. '+text,font=('微软雅黑 12')),sg.Push(),
                             sg.Button(tooltip='完成',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/done.png',key='w'+str(num)),
                             sg.Button(tooltip='查看',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/menu.png',key='c'+str(num))])
-                            linelayout.append([eg.Text(note(et),font=('微软雅黑 8'))])
+                            linelayout.append([sg.Text(note(et),font=('微软雅黑 8'))])
                         layout.append(linelayout)
                     else:
                         #未设定时间任务
-                        layout.append([eg.Text(str(No_num+1)+'. '+text,font=('微软雅黑 12')),sg.Push(),
+                        layout.append([sg.Text(str(No_num+1)+'. '+text,font=('微软雅黑 12')),sg.Push(),
                         sg.Button(tooltip='完成',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/done.png',key='w'+str(num)),
                         sg.Button(tooltip='查看',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/menu.png',key='c'+str(num))])
                     No_num+=1
                     if No_num==10:
-                        layout.append([eg.Text('目前仅显示10个任务',justification='center',font=('微软雅黑 12'))])
+                        layout.append([sg.Text('目前仅显示10个任务',justification='center',font=('微软雅黑 12'))])
                         break
                     show_plan_num=1
                 a+=1
@@ -243,7 +246,7 @@ def main():
         elif event=='重置在总结功能中录入的成绩':
             if os.path.isfile('data/User_info.json'):
                 os.remove('data/User_info.json')
-            eg.Popup('操作已成功完成')                    
+            sg.Popup('操作已成功完成')                    
         elif event=='总结':
             summary()
         elif event=='登录(注册)':
@@ -272,7 +275,7 @@ def main():
             try:
                 Check_New_Homework()
             except ConnectionError:
-                eg.Popup('网络异常,请检查您的网络连接')
+                sg.Popup('网络异常,请检查您的网络连接')
             window.Close()
             main()
             break
@@ -281,28 +284,29 @@ def main():
             try:
                 View_Class()
             except ConnectionError:
-                eg.Popup('网络异常,请检查您的网络连接')
+                sg.Popup('网络异常,请检查您的网络连接')
         elif event=='关于':
             layout=[
-                [eg.Text('关于',font=('微软雅黑 15'))],
-                [eg.Text('Study To Do (学习待办)')],
-                [eg.Text('版本: '+ver)],
-                [eg.Text('By Moemu')],
-                [eg.Text('特别感谢: ',font=('微软雅黑 13'))],
-                [eg.Text('Teacher Xie (提供部分改进建议和BUG反馈)')],
-                [eg.Text('Mr Zhu (手气不错,测试出几个漏洞)')],
-                [eg.Text('A High-School Student (帮忙测试的学长)')],
-                [eg.Text('版权声明:',font=('微软雅黑 13'))],
-                [eg.Text('本程序是自由软件：\n你可以再分发之和/或依照由自由软件基金会发布的 GNU 通用公共许可证修改之，\n无论是版本 3 许可证，还是（按你的决定）任何以后版都可以。\n发布该程序是希望它能有用,但是并无保障;甚至连可销售和符合某个特定的目的都不保证。')],
-                [eg.Text('请参看 GNU 通用公共许可证。'),sg.Text('了解详情',font=('微软雅黑 10'),text_color='blue',enable_events=True,key='licenses')],
+                [sg.Text('关于',font=('微软雅黑 15'))],
+                [sg.Text('Study To Do (学习待办)')],
+                [sg.Text('版本: '+ver)],
+                [sg.Text('By Moemu')],
+                [sg.Text('特别感谢: ',font=('微软雅黑 13'))],
+                [sg.Text('Teacher Xie (提供部分改进建议和BUG反馈)')],
+                [sg.Text('Mr Zhu (手气不错,测试出几个漏洞)')],
+                [sg.Text('A High-School Student (帮忙测试的学长)')],
+                [sg.Text('版权声明:',font=('微软雅黑 13'))],
+                [sg.Text('本程序是自由软件：\n你可以再分发之和/或依照由自由软件基金会发布的 GNU 通用公共许可证修改之，\n无论是版本 3 许可证，还是（按你的决定）任何以后版都可以。\n发布该程序是希望它能有用,但是并无保障;甚至连可销售和符合某个特定的目的都不保证。')],
+                [sg.Text('请参看 GNU 通用公共许可证。'),sg.Text('了解详情',font=('微软雅黑 10'),text_color='blue',enable_events=True,key='licenses')],
                 [sg.VPush()],
-                [eg.back()]
+                [sg.Button(tooltip='返回',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/back.png',key='返回')]
             ]
             windows=sg.Window('关于页面',layout=layout,size=(550,450),icon='ico/LOGO.ico',resizable=True)
             event,value=windows.Read()
+            if event == 'licenses':
+                webbrowser.open_new('https://github.com/WhitemuTeam/Study-To-Do/blob/main/License')
             windows.Close()
         elif event=='帮助文档':
-            import webbrowser
             webbrowser.open_new('https://doc.muspace.top/#/zh-cn/Program/Study-To-Do')
         elif event=='检查更新':
             Update_file=os.path.dirname(os.path.abspath(__file__))+r'\..\Update.exe'
@@ -326,29 +330,29 @@ def main():
             #查看任务详情
             tasknum=int(event.split('c')[1])
             layout=[
-                [eg.Text('科目:',font=('微软雅黑 14'))],
-                [eg.Text(get_plan_info(tasknum,'sub'))],
-                [eg.Text('计划内容:',font=('微软雅黑 14'))],
-                [eg.Text(get_plan_info(tasknum,'text'))]]
+                [sg.Text('科目:',font=('微软雅黑 14'))],
+                [sg.Text(get_plan_info(tasknum,'sub'))],
+                [sg.Text('计划内容:',font=('微软雅黑 14'))],
+                [sg.Text(get_plan_info(tasknum,'text'))]]
             if get_plan_info(tasknum,'atime')!=(None,None):
                 atime=get_plan_info(tasknum,'atime')
                 text='从 '+atime[0]+' 至 '+atime[1]
                 layout.extend([
-                    [eg.Text('时间限制:',font=('微软雅黑 14'))],
-                    [eg.Text(text)]])
+                    [sg.Text('时间限制:',font=('微软雅黑 14'))],
+                    [sg.Text(text)]])
             if get_plan_info(tasknum,'des')!=None:
                 layout.extend([
-                    [eg.Text('计划描述:',font=('微软雅黑 14'))],
-                    [eg.Text(get_plan_info(tasknum,'des'))]])
+                    [sg.Text('计划描述:',font=('微软雅黑 14'))],
+                    [sg.Text(get_plan_info(tasknum,'des'))]])
             if not get_plan_info(tasknum,mode='HomeworkID'):
                 layout.extend([
                     [sg.VPush()],
-                    [eg.Button_image('ico/edit.png','更改'),eg.Button_image('ico/done.png','现在完成'),eg.Button_image('ico/done-green.png','按时完成'),eg.Button_image(path='ico/delete.png',key='删除'),sg.Push(),eg.back()]
+                    [Button_image('ico/edit.png','更改'),Button_image('ico/done.png','现在完成'),Button_image('ico/done-green.png','按时完成'),Button_image(path='ico/delete.png',key='删除'),sg.Push(),sg.Button(tooltip='返回',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/back.png',key='返回')]
                 ])
             else:
                 layout.extend([
                     [sg.VPush()],
-                    [eg.Button_image('ico/done.png','标记为完成'),sg.Push(),eg.back()]
+                    [Button_image('ico/done.png','标记为完成'),sg.Push(),sg.Button(tooltip='返回',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/back.png',key='返回')]
                 ])
             detail_info=sg.Window('任务详情',layout,icon='ico/LOGO.ico')
             event,value=detail_info.Read()
