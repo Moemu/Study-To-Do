@@ -164,7 +164,7 @@ def log_in_gui():
         [sg.Input()],
         [sg.Text('密码')],
         [sg.Input()],
-        [sg.Button('登录'),sg.push(),sg.Button('注册')]
+        [sg.Button('登录'),sg.Push(),sg.Button('注册')]
     ]
     lg=sg.Window('登录或注册',layout,font=('微软雅黑 10'))
     event,value=lg.Read()

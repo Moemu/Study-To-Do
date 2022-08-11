@@ -8,6 +8,8 @@
 
 Study to do(学习待办) 是一款致力于学习任务整理，学习情况分析的一款应用软件，对学习计划安排能力强的学生适用。其灵感来源于Microsoft to do(微软待办)，但 Study to do 在学习数据整理方面体现出的优势比 Micosoft to do 较强。旨在帮助用户管理学习任务，了解学科所用时间占比，以帮助用户调整学习计划。
 
+你可以通过[文档站](https://doc.muspace.top/#/zh-cn/Program/Study-To-Do?id=屏幕截图)查阅该应用的程序截图
+
 # 组成
 
 Study To Do 应指导员建议，分为2个版本
@@ -33,6 +35,9 @@ Study To Do 应指导员建议，分为2个版本
 5. 在使用在线功能中您可能遇到类错误，此时请至Leancloud应用中找到结构化数据并创建以下Class:
 
    `Class_list`,`Class_Member`,`Homework_list`,`Homework_Status`,`Plan`
+   
+
+注意: 从2022年8月1日开始，Leancloud国际版将不再为中国大陆提供服务，请将数据迁移至国内版以便继续使用
 
 # 有关安装包获取
 

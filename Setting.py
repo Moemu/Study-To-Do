@@ -86,7 +86,7 @@ def main():
             sg.Popup('保存设置失败,请用管理员模式打开本程序')
             backstage_status='开启'
     if showplan!=None or showsen!=None or backstage_status!=None or size!=None:
-        sg.rrPopup('保存设置成功!')
+        sg.Popup('保存设置成功!')
         save_setting(showsen,showplan,size,backstage_status,DarkMode)
     else:
         pass
