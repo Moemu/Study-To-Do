@@ -35,7 +35,6 @@ def View_Class():
     '''
     查看班级信息
     '''
-    from tool import Easy_GUI as eg
     Class_ID = Get_Class_Account()
     print(Class_ID)
     # 获取班级名
@@ -76,7 +75,6 @@ def Check_New_Homework():
     '''
     检查新作业
     '''
-    from tool import Easy_GUI as eg
     from account import log_in,read_key
     from plan_manager import save_plan
     import os

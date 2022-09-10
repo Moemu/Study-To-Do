@@ -6,7 +6,7 @@ from datetime import datetime
 import PySimpleGUI as sg
 import random,time,webbrowser
 
-ver='3.0 - A new start'
+ver='3.1 - School is beginning'
 
 def Error_Message():
     '''
