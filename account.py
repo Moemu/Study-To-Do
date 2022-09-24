@@ -56,7 +56,7 @@ def save_key(Username=None,password=None):
     with open('data/key.json','w') as f:
         f.write(json.dumps(key))
 
-def read_key(Show_Status=False):
+def read_key(Show_Status=False) -> list:
     import json,os
     if os.path.isfile('data/key.json'):
         with open('data/key.json','r') as f:
