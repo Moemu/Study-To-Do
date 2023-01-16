@@ -6,7 +6,7 @@ from datetime import datetime
 import PySimpleGUI as sg
 import random,time,webbrowser
 
-ver='3.2 - School Mail is Coming...'
+ver='3.2.1 - School Mail is Coming...'
 
 def Error_Message():
     '''
@@ -290,17 +290,18 @@ def main():
             Class_Chat.main()
         elif event=='关于':
             layout=[
-                [sg.Text('关于',font=('微软雅黑 15'))],
-                [sg.Text('Study To Do (学习待办)')],
+                [sg.Text('关于',font=('微软雅黑 20'))],
+                [sg.Text('Study To Do (学习待办)',font=('微软雅黑 15'))],
                 [sg.Text('版本: '+ver)],
                 [sg.Text('By Moemu')],
                 [sg.Text('特别感谢: ',font=('微软雅黑 13'))],
                 [sg.Text('Teacher Xie (提供部分改进建议和BUG反馈)')],
-                [sg.Text('Mr Zhu (手气不错,测试出几个漏洞)')],
+                [sg.Text('Student Zhu (手气不错,测试出几个漏洞)')],
                 [sg.Text('A High-School Student (帮忙测试的学长)')],
                 [sg.Text('版权声明:',font=('微软雅黑 13'))],
                 [sg.Text('本程序是自由软件：\n你可以再分发之和/或依照由自由软件基金会发布的 GNU 通用公共许可证修改之，\n无论是版本 3 许可证，还是（按你的决定）任何以后版都可以。\n发布该程序是希望它能有用,但是并无保障;甚至连可销售和符合某个特定的目的都不保证。')],
                 [sg.Text('请参看 GNU 通用公共许可证。'),sg.Text('了解详情',font=('微软雅黑 10'),text_color='blue',enable_events=True,key='licenses')],
+                [sg.Text('开源地址: ',font=('微软雅黑 13')),sg.Text('https://github.com/WhitemuTeam/Study-To-Do',font=('微软雅黑 10'),text_color='blue',enable_events=True,key='github')],
                 [sg.VPush()],
                 [sg.Button(tooltip='返回',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/back.png',key='返回')]
             ]
@@ -308,6 +309,8 @@ def main():
             event,value=windows.Read()
             if event == 'licenses':
                 webbrowser.open_new('https://github.com/WhitemuTeam/Study-To-Do/blob/main/License')
+            elif event == 'github':
+                webbrowser.open_new('https://github.com/WhitemuTeam/Study-To-Do')
             windows.Close()
         elif event=='帮助文档':
             webbrowser.open_new('https://doc.muspace.top/#/zh-cn/Program/Study-To-Do')

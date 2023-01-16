@@ -42,16 +42,19 @@ def save_key(Username=None,password=None):
     User_ID_Status = User_list_services.equal_to('User_ID',User_ID).find() #查询该用户ID是否被占用
     if User_ID_Status != []:
         Realname = User_ID_Status[0].get('Realname')
+        ClassID = User_ID_Status[0].get('Class_ID')
         key={
             'User_name':Username,
             'Password':password,
-            'Realname':Realname
+            'Realname':Realname,
+            'ClassID':ClassID
         }
     else:
         key={
             'User_name':Username,
             'Password':password,
-            'Realname':None
+            'Realname':None,
+            'ClassID':None
         }
     with open('data/key.json','w') as f:
         f.write(json.dumps(key))

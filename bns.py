@@ -2,9 +2,11 @@
 BNS: Background notification service(后台通知服务)
 存放于程序主目录
 '''
-import platform,leancloud
+import platform
+import leancloud,pytz,os
 import PySimpleGUI as sg
-from windows_toasts import WindowsToaster, ToastImageAndText4
+from windows_toasts import ToastImageAndText4, WindowsToaster
+from datetime import datetime
 
 leancloud.init("","") # 自行配置Leancloud的APPID和APPKEY
 
@@ -23,12 +25,13 @@ def notice(text):
     return None
 
 def check_plan_status():
-    from plan_manager import read_plan_list,get_plan_info
-    from datetime import datetime,timedelta
     import os
-    os.chdir(os.getenv('APPDATA')+r'\Study to do')
+    from datetime import datetime, timedelta
+    from plan_manager import get_plan_info, read_plan_list
     ready_done = 0
     plan_list = read_plan_list()
+    if plan_list == []:
+        return None
     for plan_name in range(len(plan_list)):
         st,et=get_plan_info(int(plan_name)-1,'atime')
         nt=datetime.now()+timedelta(seconds=600)
@@ -43,16 +46,18 @@ def Check_New_Homework():
     '''
     检查新作业
     '''
-    from account import log_in,read_key
+    import os
+
+    from account import log_in, read_key
     from plan_manager import save_plan
     from Student import Get_Class_Account
-    import os
+    if not read_key():
+        return None
     Username,Password = read_key()
     UserID=log_in(Username,Password)
     Homework_list_services = leancloud.Object.extend('Homework_list') #定位到Homework_list类
     Homework_list_service = Homework_list_services.query #查询服务
     Homework_list = Homework_list_service.equal_to('Class_ID',Get_Class_Account()).find() #查询该班级ID
-    print('Homework_list -> ',Homework_list)
     #判断是否在作业列表中含有作业
     if Homework_list == []:
         return None
@@ -63,7 +68,6 @@ def Check_New_Homework():
     Homework_Status_services = leancloud.Object.extend('Homework_Status') #定位到Homework_Status类
     Homework_Status_service = Homework_Status_services.query #查询服务
     Homework_Done_list = Homework_Status_service.equal_to('User_ID',UserID).find() #查询该用户ID
-    print('Homework_Done_list -> ',Homework_Done_list)
     for h in Homework_Done_list:
         HomeworkID_list.remove(h.get('HomeworkID'))
     OldHomeworkID_list = HomeworkID_list.copy()
@@ -71,7 +75,6 @@ def Check_New_Homework():
         Plan_list = os.listdir('plan')
         if h+'.json' in Plan_list:
             HomeworkID_list.remove(h)
-    print('Homework_list -> ',Homework_list)
     if HomeworkID_list == []:
         return None
     for hid in HomeworkID_list:
@@ -87,12 +90,52 @@ def Check_New_Homework():
     notice('有新的作业,请检查!')
     return None
 
+def Format_Message(CreateAt,Username,Message):
+    '''
+    格式化信息
+    '''
+    CreateAt = datetime.strftime(CreateAt,'%m-%d %H:%M:%S')
+    return Username[5:]+' 说: '+Message
+
+def get_realtime_message(Old_Message_CreatedAt) -> str:
+    '''
+    获取到最新的一条信息
+    :return 返回最新的一条信息,顺序为Message,Username,createdAt
+    '''
+    from Student import Get_Class_Account
+    if Get_Class_Account():
+        ClassID = Get_Class_Account()
+    # 绑定到MailBox类
+    class_obj = leancloud.Object.extend('MailBox')
+    # 查询服务
+    class_obj_query = class_obj.query
+    # 查询该班级ID的信息
+    class_obj_query.equal_to('Class_ID',ClassID)
+    # 获取信息
+    class_obj_query_result = class_obj_query.find()
+    if class_obj_query_result == []:
+        return False
+    else:
+        Lastest_Message_CreatedAt = class_obj_query_result[-1].get('createdAt').replace(tzinfo=pytz.UTC)
+        if Lastest_Message_CreatedAt > Old_Message_CreatedAt:
+            notice(Format_Message(Lastest_Message_CreatedAt,class_obj_query_result[-1].get('Username'),class_obj_query_result[-1].get('Message')))
+            return Lastest_Message_CreatedAt
+        else:
+            return Old_Message_CreatedAt
+
 def main():
     import time
+    os.chdir(os.getenv('APPDATA')+r'\Study to do')
+    Old_Message_CreatedAt = datetime.now().replace(tzinfo=pytz.UTC)
     while True:
-        check_plan_status()
-        Check_New_Homework()
-        time.sleep(30)
+        try:
+            check_plan_status()
+            Check_New_Homework()
+            Old_Message_CreatedAt = get_realtime_message(Old_Message_CreatedAt)
+        except:
+            notice('与服务器连接丢失,您将无法收取新作业通知')
+            return None
+        time.sleep(5)
 
 if __name__=='__main__':
     main()

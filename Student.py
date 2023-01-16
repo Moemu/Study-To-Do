@@ -15,22 +15,14 @@ def Check_Class_Account() -> bool:
     else:
         return False
 
-def Get_Class_Account() -> str:
+def Get_Class_Account() -> str or bool:
     '''
     查询账户所在班级ID
     '''
     import json
     with open('data/key.json','r') as f:
         data=json.loads(f.read())
-    if data['Realname'] != None:
-        Username,password=read_key()
-        User_ID = log_in(Username,password)
-        Class_list_services = leancloud.Object.extend('Class_member') #定位到Class_member类
-        Class_list_service = Class_list_services.query #查询服务
-        Class_ID_Status = Class_list_service.equal_to('User_ID',User_ID).find() #查询该班级ID
-        return Class_ID_Status[0].get('Class_ID')
-    else:
-        return False
+    return data['ClassID']
 
 def View_Class():
     '''
