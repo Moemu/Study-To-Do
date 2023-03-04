@@ -1,4 +1,3 @@
-from Statistics import *
 from plan_manager import *
 from Setting import read_setting,GetTheme
 from requests.exceptions import ConnectionError
@@ -6,7 +5,7 @@ from datetime import datetime
 import PySimpleGUI as sg
 import random,time,webbrowser
 
-ver='3.2.2 - School Mail is Coming...'
+ver='3.2.3 - Synchronize with main branch'
 
 def Error_Message():
     '''
@@ -67,11 +66,11 @@ def choice_sen(showsen):
         if Now_time<12 and Now_time>=6:
             show_sen='早上好~今天也要加油哦~'
         elif Now_time<14 and Now_time>=12:
-            show_sen='中午好~一顿充实的午饭和充实的午睡可以让下午学习动力增加哦'
+            show_sen='中午好~一顿充实的午饭和充实的午睡可以让下午工作动力增加哦'
         elif Now_time<18 and Now_time>=14:
             show_sen='下午好, 好好享受下午的时光吧~'
         elif Now_time<22 and Now_time>=18:
-            show_sen='晚上好, 学习的同时也要要早点睡哦~'
+            show_sen='晚上好, 工作的同时也要要早点睡哦~'
         else:
             show_sen='深夜了, 要注意保护眼睛哦~'
     return show_sen
@@ -86,7 +85,6 @@ def note(et:str) -> str:
     if etd<ntd:
         text+='已超时·'
     else:
-        
         difference = round((etd - ntd).total_seconds()/60)
         if difference>=1000:
             difference = round(difference/1440)
@@ -103,27 +101,27 @@ def get_menu():
     根据登录状态获取菜单列表
     '''
     from account import read_key
-    from Student import Check_Class_Account
+    from Teacher import read_class_key
     if read_key():
-        Username=read_key(True)
+        Username,_=read_key()
         menu=[
-        ['任务',['新任务','导出',['导出成PDF文件','导出任务总清单为xlsx文件']]],
+        ['作业',['发布作业','导出',['导出成PDF文件','导出任务总清单为xlsx文件']]],
         ['分类',['全部','按科目-语文','按科目-数学','按科目-英语','按科目-物理','按科目-化学','按科目-生物','按科目-地理','按科目-历史','按科目-政治','按科目-体育','按分类-生活','按时间-当天','按时间-当周','按状态-已超时']],
-        ['统计',['统计数据','重置数据',['清空所有任务记录','重置在总结功能中录入的成绩'],'生成图表',['雷达图(任务完成数量占比)','饼状图(任务完成数量占比)'],'总结']],
         ['账户',['!已登录: '+Username,'任务备份','任务还原','登出']],
-        ['!班级',['查看班级信息','打开班级聊天室','检查新作业']],
-        ['帮助',['设置','帮助文档','检查更新','关于']]
+        ['班级',['创建班级','!查看班级','!班级聊天室']],
+        ['帮助',['设置','帮助文档','关于']]
         ]
-        if Check_Class_Account():
-            menu[4][0] = '班级'
+        if read_class_key():
+            menu[3][1][0]='!创建班级'
+            menu[3][1][1]='查看班级'
+            menu[3][1][2]='班级聊天室'
     else:
         menu=[
-        ['任务',['新任务','导出',['导出成PDF文件','导出任务总清单为xlsx文件']]],
+        ['!作业',['发布作业','导出',['导出成PDF文件','导出任务总清单为xlsx文件']]],
         ['分类',['全部','按科目-语文','按科目-数学','按科目-英语','按科目-物理','按科目-化学','按科目-生物','按科目-地理','按科目-历史','按科目-政治','按科目-体育','按分类-生活','按时间-当天','按时间-当周','按状态-已超时']],
-        ['统计',['统计数据','重置数据',['清空所有任务记录','重置在总结功能中录入的成绩'],'生成图表',['雷达图(任务完成数量占比)','饼状图(任务完成数量占比)'],'总结']],
         ['账户',['登录(注册)','!任务备份','!任务还原','!登出']],
-        ['!班级',['查看班级信息','打开班级聊天室','检查新作业']],
-        ['帮助',['设置','帮助文档','检查更新','关于']]
+        ['!班级',['创建班级','查看班级','班级聊天室']],
+        ['帮助',['设置','帮助文档','关于']]
         ]
     return menu
 
@@ -135,11 +133,11 @@ def main():
     Run_check()
     sg.set_options(font=('微软雅黑 10'),icon=('ico/LOGO.ico'))
     sg.theme(GetTheme()[0])
-    showsen,showplan,size,backstage_status,DarkMode=read_setting()
+    showsen,showplan,size,DarkMode=read_setting()
     menu=get_menu()
     layout=[
         [sg.Menu(menu,font=('微软雅黑 8'),background_color=GetTheme()[1])],
-        [sg.Text('所有任务',font=('微软雅黑 15'))],
+        [sg.Text('所有作业',font=('微软雅黑 15'))],
         [sg.Text(choice_sen(showsen),font=('微软雅黑 8'))]
         ]
     No_num=0
@@ -148,7 +146,7 @@ def main():
             txtname_list=read_plan_list() #传入计划列表
         else:
             txtname_list=read_plan_with_setting(showplan) #传入计划列表
-            layout[1]=[sg.Text('所有任务({})'.format(showplan.split('-')[1]),font=('微软雅黑 15'))]
+            layout[1]=[sg.Text('所有作业({})'.format(showplan.split('-')[1]),font=('微软雅黑 15'))]
         if txtname_list==[]:
             layout.append([sg.Image(filename='ico/empty-box.png')])
         else:
@@ -165,24 +163,21 @@ def main():
                         if check_plan_time(plan_name)==True:
                             #超时任务
                             linelayout.append([sg.Text(str(No_num+1)+'. '+text,font=('微软雅黑 12'),text_color='red'),sg.Push(),
-                            sg.Button(tooltip='完成',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/done.png',key='w'+str(num)),
                             sg.Button(tooltip='查看',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/menu.png',key='c'+str(num))])
                             linelayout.append([sg.Text(note(et),font=('微软雅黑 8'),text_color='red')])
                         else:
                             #未超时任务
                             linelayout.append([sg.Text(str(No_num+1)+'. '+text,font=('微软雅黑 12')),sg.Push(),
-                            sg.Button(tooltip='完成',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/done.png',key='w'+str(num)),
                             sg.Button(tooltip='查看',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/menu.png',key='c'+str(num))])
                             linelayout.append([sg.Text(note(et),font=('微软雅黑 8'))])
                         layout.append(linelayout)
                     else:
                         #未设定时间任务
                         layout.append([sg.Text(str(No_num+1)+'. '+text,font=('微软雅黑 12')),sg.Push(),
-                        sg.Button(tooltip='完成',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/done.png',key='w'+str(num)),
                         sg.Button(tooltip='查看',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/menu.png',key='c'+str(num))])
                     No_num+=1
                     if No_num==10:
-                        layout.append([sg.Text('目前仅显示10个任务',justification='center',font=('微软雅黑 12'))])
+                        layout.append([sg.Text('目前仅显示10个作业',justification='center',font=('微软雅黑 12'))])
                         break
                     show_plan_num=1
                 a+=1
@@ -196,24 +191,24 @@ def main():
             No_num=0
         else:
             No_num-=7
-        window=sg.Window('学习计划通 '+ver,layout=layout,size=(500,500+(55*No_num)),icon='ico/LOGO.ico')
+        window=sg.Window('学习计划通(教师端) '+ver,layout=layout,size=(500,500+(55*No_num)),icon='ico/LOGO.ico')
     else:
         x,y=size.split('x')
         size=(x,y)
-        window=sg.Window('学习计划通 '+ver,layout=layout,size=size,icon='ico/LOGO.ico')
+        window=sg.Window('学习计划通(教师端) '+ver,layout=layout,size=size,icon='ico/LOGO.ico')
     while True:
         event,value=window.Read()
         print('主页面输出: ',event)
         if event==sg.WIN_CLOSED:
             break
-        elif event=='新任务':
-            add_plan()
+        elif event=='发布作业':
+            try:
+                add_plan()
+            except ConnectionError:
+                sg.Popup('网络异常,请检查您的网络连接')
             window.Close()
             main()
             break
-        elif event=='导出成Markdown文件':
-            from print import txt_to_markdown_GUI
-            txt_to_markdown_GUI()
         elif event=='导出成PDF文件':
             from print import txt_to_PDF_GUI
             txt_to_PDF_GUI()
@@ -224,31 +219,6 @@ def main():
             P.new()
             plan_log.main()
             P.close()
-        elif event=='统计数据':
-            Show_data()
-        elif event in ['雷达图(任务完成时间占比)','雷达图(任务完成数量占比)','饼状图(任务完成时间占比)','饼状图(任务完成数量占比)']:
-            chart.main(event)
-        elif event=='清空所有任务记录':
-            layout =[
-                [sg.Text('注意:',font=('微软雅黑 12'))],
-                [sg.Text('此选项将会清空任何已完成/进行中的任务,且无法恢复,请问要继续吗?')],
-                [sg.Button('确定'),sg.Push(),sg.Button('取消')]
-                ]
-            windows = sg.Window('警告',layout=layout, font=('微软雅黑 10'))
-            event,value = windows.Read()
-            windows.Close()
-            if event=='确定':
-                for file in os.listdir('plan'):
-                    os.remove('plan/'+file)
-            window.Close()
-            main()
-            break
-        elif event=='重置在总结功能中录入的成绩':
-            if os.path.isfile('data/User_info.json'):
-                os.remove('data/User_info.json')
-            sg.Popup('操作已成功完成')                    
-        elif event=='总结':
-            summary()
         elif event=='登录(注册)':
             from account import log_in_gui
             log_in_gui()
@@ -259,14 +229,14 @@ def main():
             from account import send_plans
             try:
                 send_plans()
-            except:
-                sg.Popup('网络异常,请检查您的网络连接或者稍后重试')
+            except ConnectionError:
+                sg.Popup('网络异常,请检查您的网络连接')
         elif event=='任务还原':
             from account import get_plans
             try:
                 get_plans()
-            except:
-                sg.Popup('网络异常,请检查您的网络连接或者稍后重试')
+            except ConnectionError:
+                sg.Popup('网络异常,请检查您的网络连接')
             window.Close()
             main()
             break
@@ -276,31 +246,32 @@ def main():
             window.Close()
             main()
             break
-        elif event == '检查新作业':
-            from Student import Check_New_Homework
+        elif event=='创建班级':
+            from Teacher import Creat_Class
+            creat_class = Creat_Class()
             try:
-                Check_New_Homework()
+                creat_class.GUI()
             except ConnectionError:
-                sg.Popup('网络异常,请检查您的网络连接或者稍后重试')
+                sg.Popup('网络异常,请检查您的网络连接')
             window.Close()
             main()
             break
-        elif event == '查看班级信息':
-            from Student import View_Class
+        elif event=='查看班级':
+            from Teacher import View_Class
             try:
                 View_Class()
             except ConnectionError:
-                sg.Popup('网络异常,请检查您的网络连接或者稍后重试')
-        elif event == '打开班级聊天室':
-            from Student import Class_Chat
+                sg.Popup('网络异常,请检查您的网络连接')
+        elif event=="班级聊天室":
+            from Teacher import Class_Chat
             try:
                 Class_Chat.main()
-            except:
-                sg.Popup('网络异常,请检查您的网络连接或者稍后重试')
+            except ConnectionError:
+                sg.Popup('网络异常,请检查您的网络连接')
         elif event=='关于':
             layout=[
                 [sg.Text('关于',font=('微软雅黑 20'))],
-                [sg.Text('学习计划通',font=('微软雅黑 15'))],
+                [sg.Text('学习计划通(教师端)',font=('微软雅黑 15'))],
                 [sg.Text('版本: '+ver)],
                 [sg.Text('By Moemu')],
                 [sg.Text('特别感谢: ',font=('微软雅黑 13'))],
@@ -334,15 +305,9 @@ def main():
                 window.Close()
                 main()
                 break
-        elif event.find('w')!=-1:
-            #任务完成
-            tasknum=int(event.split('w')[1])
-            Complete_plan(tasknum)
-            window.Close()
-            main()
-            break
         elif event.find('c')!=-1:
             #查看任务详情
+            from Teacher import Get_UnFinishStus,Get_OtFinishStus
             tasknum=int(event.split('c')[1])
             layout=[
                 [sg.Text('科目:',font=('微软雅黑 14'))],
@@ -359,34 +324,41 @@ def main():
                 layout.extend([
                     [sg.Text('计划描述:',font=('微软雅黑 14'))],
                     [sg.Text(get_plan_info(tasknum,'des'))]])
-            if not get_plan_info(tasknum,mode='HomeworkID'):
-                layout.extend([
-                    [sg.VPush()],
-                    [Button_image('ico/edit.png','更改'),Button_image('ico/done.png','现在完成'),Button_image('ico/done-green.png','按时完成'),Button_image(path='ico/delete.png',key='删除'),sg.Push(),sg.Button(tooltip='返回',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/back.png',key='返回')]
-                ])
-            else:
-                layout.extend([
-                    [sg.VPush()],
-                    [Button_image('ico/done.png','标记为完成'),sg.Push(),sg.Button(tooltip='返回',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/back.png',key='返回')]
-                ])
-            detail_info=sg.Window('任务详情',layout,icon='ico/LOGO.ico')
+            try:
+                UnFinishStu = Get_UnFinishStus(get_plan_info(tasknum,'HomeworkID'))
+                OtFinishStu = Get_OtFinishStus(get_plan_info(tasknum,'HomeworkID'))
+                if UnFinishStu == '(所有学生均已完成)':
+                    Complete_plan(tasknum)
+                layout.append([
+                [sg.Text('超时完成:',font=('微软雅黑 14'))],
+                [sg.Text(OtFinishStu)],
+                [sg.Text('未完成学生: ',font=('微软雅黑 14'))],
+                [sg.Text(UnFinishStu)]])
+            except ConnectionError:
+                sg.Popup('网络异常,请检查您的网络连接')
+                return None
+            # layout.extend([
+            #     [sg.VPush()],
+            #     [sg.Button_image('ico/edit.png','更改'),sg.Button_image('ico/done.png','标记为结束'),sg.Button_image(path='ico/delete.png',key='删除'),sg.Push(),sg.back()]
+            # ])
+            layout.extend([
+                [sg.VPush()],
+                [sg.Push(),sg.Button('退出')]
+            ])
+            detail_info=sg.Window('作业详情',layout,icon='ico/LOGO.ico',font=('微软雅黑 10'))
             event,value=detail_info.Read()
             detail_info.Close()
             print(event)
-            if not event in (sg.WIN_CLOSED,'返回',None):
-                if event=='更改':
-                    change_plan(str(tasknum))
-                elif event=='现在开始':
-                    change_plan_time(tasknum,st=True)
-                elif event=='现在完成' or event == '标记为完成':
-                    Complete_plan(tasknum)
-                elif event=='按时完成':
-                    Complete_plan(tasknum,mode='Intime')
-                elif event=='删除':
-                    os.remove('plan/'+os.listdir('plan')[tasknum])
-                window.Close()
-                main()
-                break
+            # if not event in (sg.WIN_CLOSED,'返回',None):
+            #     if event=='更改':
+            #         change_plan(str(tasknum))
+            #     elif event=='标记为结束':
+            #         Complete_plan(tasknum)
+            #     elif event=='删除':
+            #         os.remove('plan/'+os.listdir('plan')[tasknum])
+            #     window.Close()
+            #     main()
+            #     break
         elif showplan=='全部'or showplan.split('-')[1]:
             #分类选择
             if event=='全部'or event.find('-')!=-1:

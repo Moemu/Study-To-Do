@@ -96,16 +96,17 @@ def time_seter(value:str) -> str:
 def save_plan(txtname:str,sub:str,plan:str,
     stime=None,etime=None,
     detail=None,status='进行中',
-    HomeworkID=False):
+    HomeworkID=None):
     '''
     保存任务
-    导入变量列表: 文档名,科目,计划,开始结束时间,描述(detail),状态(status)
+    导入变量列表: 文档名,科目,计划,开始结束时间,描述(detail),状态(status),HomeworkID
     '''
     with open('plan/'+txtname,mode='w') as f:
         f.write(json.dumps({'sub':sub,'text':plan,'stime':stime,'etime':etime,'des':detail,'status':status,'HomeworkID':HomeworkID},sort_keys=True, indent=4, separators=(',', ': ')))
 
 def add_plan():
     import time,datetime
+    from Teacher import Get_Plan_ID,Send_Plan
     layout=[
         [sg.Text('科目:')],
         [sg.InputCombo(['语文','数学','英语','物理','历史','化学','生物','地理','政治','体育','生活','其他'],size=(12,5))],
@@ -117,7 +118,7 @@ def add_plan():
         [sg.Text('或者指定具体开始/结束时间:'),sg.Checkbox('启用',font=('微软雅黑 8')),sg.Text(' (将在下一窗口设置)')],
         [sg.Button('下一步')]
     ]
-    window=sg.Window('新建自定义任务',layout=layout,icon='ico/LOGO.ico',font=('微软雅黑 10'))
+    window=sg.Window('新建自定义作业',layout=layout,icon='ico/LOGO.ico',font=('微软雅黑 10'))
     event,value=window.Read()
     print('任务新建输出: ',value)
     if event==sg.WIN_CLOSED:
@@ -171,8 +172,11 @@ def add_plan():
             return None
         stime,etime=result
         Gwindow.Close()
-    save_plan(get_newplan_name(),sub,title,stime,etime,des)
-    sg.popup('计划添加成功~',font=('微软雅黑 10'))
+    HomeworkID = Get_Plan_ID()
+    Filename = HomeworkID + '.json'
+    save_plan(Filename,sub,title,stime,etime,des,HomeworkID=HomeworkID)
+    Send_Plan(HomeworkID)
+    sg.popup('作业发布成功~',font=('微软雅黑 10'))
     window.Close()
 
 def read_plan_list():
@@ -204,7 +208,6 @@ def get_plan_info(num,mode:str,Path=None):
         txtname=os.listdir('plan')[int(num)]
         with open('plan/'+txtname,'r') as f:
             data=json.loads(f.read())
-            del data['HomeworkID']
             return data.values()
     if Path!=None:
         try:
@@ -301,14 +304,6 @@ def Complete_plan(num,mode='Now'):
     txtname=os.listdir('plan')[int(num)]
     with open('plan/'+txtname,'r') as f:
         data=json.loads(f.read())
-    if get_plan_info(num,'HomeworkID'):
-        from Student import Finish_Homework
-        try:
-            print('Homework Status -> ',check_plan_time(num))
-            Finish_Homework(HomeworkID = get_plan_info(num,'HomeworkID'),Overtime = check_plan_time(num))
-        except ConnectionError:
-            sg.Popup('网络异常,请检查您的网络连接')
-            return None
     data['status']='已结束'
     with open('plan/'+txtname,'w') as f:
         f.write(json.dumps(data,sort_keys=True,indent=4,separators=(',', ': ')))
@@ -373,7 +368,7 @@ def change_plan(num):
     '''
     from tool import split_time,repair_num
     txtname=os.listdir('plan')[int(num)]
-    des,etime,status,stime,sub,plan=get_plan_info(num,'all')
+    HomeworkID,des,etime,status,stime,sub,plan=get_plan_info(num,'all')
     if des == None:
         des = ''
     layout=[

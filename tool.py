@@ -165,7 +165,7 @@ def plan_folder_check():
     '''
     import os
     from plan_manager import get_plan_info
-    os.chdir(os.getenv('APPDATA')+'\Study to do')
+    os.chdir(os.getenv('APPDATA')+'\Study to do(Teacher)')
     def remove_error_file():
         '''
         移除错误文件
@@ -199,9 +199,9 @@ def Run_check():
     #     import shutil
     #     shutil.copytree('ico',os.getenv('APPDATA')+'\Study to do\ico')
     os.chdir(os.getenv('APPDATA'))
-    if not os.path.isdir('Study to do'):
-        os.mkdir('Study to do')
-    os.chdir('Study to do')
+    if not os.path.isdir('Study to do(Teacher)'):
+        os.mkdir('Study to do(Teacher)')
+    os.chdir('Study to do(Teacher)')
     #plan文件夹检查
     if os.path.isdir('plan')==False:
         os.mkdir('plan')
@@ -216,7 +216,7 @@ def Run_check():
     if os.path.isfile('data/setting.json')==False:
         from datetime import datetime
         with open('data/setting.json','w',encoding='utf-8') as f:
-            setting={'showsen':'学习技巧','showplan':'全部','size':'500x500','backstage_status':'关闭'}
+            setting={'showsen':'学习技巧','showplan':'全部','size':'500x500',"DarkMode": "关闭"}
             f.write(json.dumps(setting, sort_keys=True, indent=4, separators=(',', ': ')))
     try:
         from Setting import read_setting
@@ -224,7 +224,7 @@ def Run_check():
     except:
         from datetime import datetime
         with open('data/setting.json','w',encoding='utf-8') as f:
-            setting={'showsen':'学习技巧','showplan':'全部','size':'500x500','backstage_status':'关闭'}
+            setting={'showsen':'学习技巧','showplan':'全部','size':'500x500',"DarkMode": "关闭"}
             f.write(json.dumps(setting, sort_keys=True, indent=4, separators=(',', ': ')))
     #依赖文件检查(learn_sen.txt)
     if os.path.isfile('data/learn_sen.txt')==False:

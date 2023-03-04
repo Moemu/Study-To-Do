@@ -177,7 +177,7 @@ class plan_log:
     
     def GUI():
         import sys,os
-        path=os.getenv('APPDATA')+'\Study to do'
+        path=os.getenv('APPDATA')+'\Study to do(Teacher)'
         file_path=(path+'\data\Plan_log.xlsx')
         print(file_path)
         layout=[
@@ -200,6 +200,7 @@ class plan_log:
     def main(GUI=True):
         from openpyxl import Workbook
         from tool import repair_num
+        from Teacher import Get_UnFinishStus,Get_OtFinishStus
         wb = Workbook()    #创建文件对象 
         #获取第一个sheet
         ws = wb.active     
@@ -211,6 +212,8 @@ class plan_log:
         ws['E1'] = '任务结束时间'
         ws['F1'] = '任务描述'
         ws['G1'] = '任务状态'
+        ws['H1'] = '未完成名单'
+        ws['I1'] = '超时完成名单'
         txtname_list=read_plan_list()
         plan_num=[]
         plan_sub=[]
@@ -219,6 +222,8 @@ class plan_log:
         plan_etime=[]
         plan_des=[]
         plan_status=[]
+        Unfinish=[]
+        Otfinish=[]
         for plan_name in range(len(txtname_list)):
             plan_num.append(repair_num(plan_name+1))
             plan_sub.append(get_plan_info(plan_name,'sub'))
@@ -228,6 +233,8 @@ class plan_log:
             plan_etime.append(et)
             plan_des.append(get_plan_info(plan_name,'des'))
             plan_status.append(get_plan_info(plan_name,'status'))
+            Unfinish.append(Get_UnFinishStus(get_plan_info(plan_name,'HomeworkID')))
+            Otfinish.append(Get_OtFinishStus(get_plan_info(plan_name,'HomeworkID')))
         plan_stime=plan_log.repair_value(plan_stime)
         plan_etime=plan_log.repair_value(plan_etime)
         plan_des=plan_log.repair_value(plan_des)
@@ -238,6 +245,8 @@ class plan_log:
         ws=plan_log.write_column(plan_etime,'E',ws)
         ws=plan_log.write_column(plan_des,'F',ws)
         ws=plan_log.write_column(plan_status,'G',ws)
+        ws=plan_log.write_column(Unfinish,'H',ws)
+        ws=plan_log.write_column(Otfinish,'I',ws)
         wb.save("data/Plan_log.xlsx")
         if GUI==True:
             plan_log.GUI()

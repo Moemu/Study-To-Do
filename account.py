@@ -2,7 +2,7 @@ import leancloud,requests
 import PySimpleGUI as sg
 from plan_manager import *
 
-leancloud.init("", "") # 自行配置Leancloud的APPID和APPKEY
+leancloud.init("OzN2cISaG1cUDK9wLAw2lB4F-gzGzoHsz", "ex4DGUuGw9yQAVoRfwUpbU2p")
 sg.set_options(font=('微软雅黑 10'))
 
 def sign_up(User_name=None,password=None):
@@ -34,44 +34,22 @@ def log_in(User_name=None,password=None):
     except requests.exceptions.ConnectionError:
         return 'InternetError'
 
-def save_key(Username=None,password=None):
+def save_key(User_name=None,password=None):
     import json
-    User_ID=log_in(Username,password)
-    User_services = leancloud.Object.extend('Class_member')
-    User_list_services = User_services.query #查询服务
-    User_ID_Status = User_list_services.equal_to('User_ID',User_ID).find() #查询该用户ID是否被占用
-    if User_ID_Status != []:
-        Realname = User_ID_Status[0].get('Realname')
-        ClassID = User_ID_Status[0].get('Class_ID')
-        key={
-            'User_name':Username,
-            'Password':password,
-            'Realname':Realname,
-            'ClassID':ClassID
-        }
-    else:
-        key={
-            'User_name':Username,
-            'Password':password,
-            'Realname':None,
-            'ClassID':None
-        }
-    with open('data/key.json','w') as f:
+    key={
+        'User_name':User_name,
+        'Password':password
+    }
+    with open(r'data\key.json','w') as f:
         f.write(json.dumps(key))
+    return None
 
-def read_key(Show_Status=False) -> list:
+def read_key() -> list:
     import json,os
     if os.path.isfile('data/key.json'):
         with open('data/key.json','r') as f:
             key=json.loads(f.read())
         Username=key['User_name']
-        Realname=key['Realname']
-        if Show_Status == True:
-            print('Realname -> ',Realname)
-            if Realname != None:
-                return Realname
-            else:
-                return Username
         password=key['Password']
         return Username,password
     else:
@@ -229,20 +207,6 @@ def log_in_gui():
         return None
 
 def log_out():
-    from Student import Check_Class_Account
     import os
-    if Check_Class_Account():
-        if sg.popup_yes_no('一旦登出,本地的作业文件将会删除,要继续吗?',title='确认') == 'Yes':
-            from plan_manager import get_plan_info
-            plan_list = os.listdir('plan')
-            Remove_plan_list = []
-            for plan in plan_list:
-                if get_plan_info(plan_list.index(plan),'HomeworkID'):
-                    Remove_plan_list.append(plan)
-            for plan in Remove_plan_list:
-                print('Remove: ',plan)
-                os.remove('plan/'+plan)
-        else:
-            return None
     os.remove('data/key.json')
     sg.Popup('已登出...')
