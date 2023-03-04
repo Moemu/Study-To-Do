@@ -56,7 +56,7 @@ def Update_plan_data():
 def Show_data():
     import PySimpleGUI as sg
     import json
-    from tool import Easy_GUI,progress
+    from tool import progress
     Progress = progress()
     Progress.new()
     Update_plan_data()
@@ -70,7 +70,7 @@ def Show_data():
     layout=[
         [sg.Text('统计数据',font=('微软雅黑 15'))],
         [sg.Text(text,font=('微软雅黑 10'))],
-        [sg.Push(),Easy_GUI.back()]
+        [sg.Push(),sg.Button("返回")]
     ]
     Progress.add(100)
     Progress.close()

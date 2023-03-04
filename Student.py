@@ -236,6 +236,12 @@ class Class_Chat:
     def main():
         ClassID = Get_Class_Account()
         Username = read_key()[0]
+        Class_list_services = leancloud.Object.extend('Class_list') #定位到Class_list类
+        Class_list_service = Class_list_services.query #查询服务
+        Class_ID_Status = Class_list_service.equal_to('Class_ID',ClassID).find()
+        if len(Class_ID_Status) == 0:
+            sg.Popup('该账号尚未绑定任何班级!',font=('微软雅黑 10'))
+            return None
         NewMessage_str,Old_Message = Class_Chat.Get_New_Five_Message(ClassID)
         layout =[
             [sg.Text('消息框')],

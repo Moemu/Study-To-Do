@@ -6,7 +6,7 @@ from datetime import datetime
 import PySimpleGUI as sg
 import random,time,webbrowser
 
-ver='3.2.1 - School Mail is Coming...'
+ver='3.2.2 - School Mail is Coming...'
 
 def Error_Message():
     '''
@@ -196,11 +196,11 @@ def main():
             No_num=0
         else:
             No_num-=7
-        window=sg.Window('Study To Do '+ver,layout=layout,size=(500,500+(55*No_num)),icon='ico/LOGO.ico')
+        window=sg.Window('学习计划通 '+ver,layout=layout,size=(500,500+(55*No_num)),icon='ico/LOGO.ico')
     else:
         x,y=size.split('x')
         size=(x,y)
-        window=sg.Window('Study To Do '+ver,layout=layout,size=size,icon='ico/LOGO.ico')
+        window=sg.Window('学习计划通 '+ver,layout=layout,size=size,icon='ico/LOGO.ico')
     while True:
         event,value=window.Read()
         print('主页面输出: ',event)
@@ -257,10 +257,16 @@ def main():
             break
         elif event=='任务备份':
             from account import send_plans
-            send_plans()
+            try:
+                send_plans()
+            except:
+                sg.Popup('网络异常,请检查您的网络连接或者稍后重试')
         elif event=='任务还原':
             from account import get_plans
-            get_plans()
+            try:
+                get_plans()
+            except:
+                sg.Popup('网络异常,请检查您的网络连接或者稍后重试')
             window.Close()
             main()
             break
@@ -275,7 +281,7 @@ def main():
             try:
                 Check_New_Homework()
             except ConnectionError:
-                sg.Popup('网络异常,请检查您的网络连接')
+                sg.Popup('网络异常,请检查您的网络连接或者稍后重试')
             window.Close()
             main()
             break
@@ -284,14 +290,17 @@ def main():
             try:
                 View_Class()
             except ConnectionError:
-                sg.Popup('网络异常,请检查您的网络连接')
+                sg.Popup('网络异常,请检查您的网络连接或者稍后重试')
         elif event == '打开班级聊天室':
             from Student import Class_Chat
-            Class_Chat.main()
+            try:
+                Class_Chat.main()
+            except:
+                sg.Popup('网络异常,请检查您的网络连接或者稍后重试')
         elif event=='关于':
             layout=[
                 [sg.Text('关于',font=('微软雅黑 20'))],
-                [sg.Text('Study To Do (学习待办)',font=('微软雅黑 15'))],
+                [sg.Text('学习计划通',font=('微软雅黑 15'))],
                 [sg.Text('版本: '+ver)],
                 [sg.Text('By Moemu')],
                 [sg.Text('特别感谢: ',font=('微软雅黑 13'))],
