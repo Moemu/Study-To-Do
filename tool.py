@@ -245,9 +245,11 @@ class ChatWithGPT():
     def __init__(self):
         Run_check()
         from account import read_key
-        self.username = read_key(Show_Status=True)
-        if not self.username:
+        username = read_key()
+        if not username:
             self.username = '你'
+        else:
+            self.username = username[0]
         self.conversation_list = []
 
     def update_chatwindow(self,text,speecher):
