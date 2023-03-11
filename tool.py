@@ -237,3 +237,81 @@ def Run_check():
     #检查任务文件夹是否出错
     plan_folder_check()
     print('Run_check pass')
+
+class ChatWithGPT():
+    '''
+    Chat with GPT
+    '''
+    def __init__(self):
+        Run_check()
+        from account import read_key
+        self.username = read_key(Show_Status=True)
+        if not self.username:
+            self.username = '你'
+        self.conversation_list = []
+
+    def update_chatwindow(self,text,speecher):
+        self.window.Element('_OUTPUT_').Update(speecher+': '+text+'\n',text_color_for_value='black',append=True)
+        self.window.refresh()
+
+    def send_and_receive_message(self,message):
+        import openai
+        self.conversation_list.append({"role":"user","content":message})
+        openai.api_key = self.GPTKey
+        try:
+            completion = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo", 
+            messages=self.conversation_list
+            )
+            answer = completion.choices[0].message['content']
+        except:
+            self.update_chatwindow('Ai连接失败,请检查网络连接',speecher='系统')
+            return False
+        self.conversation_list.append({"role":"assistant","content":answer})
+        return answer
+
+    def initGPT(self):
+        import leancloud
+        leancloud.init("OzN2cISaG1cUDK9wLAw2lB4F-gzGzoHsz", "ex4DGUuGw9yQAVoRfwUpbU2p")
+        self.update_chatwindow('API Key获取中...',speecher='系统')
+        try:
+            self.GPTKey = leancloud.Object.extend('APIKey').query.first().get('APIKey')
+            self.update_chatwindow('API Key获取成功', speecher='系统')
+        except:
+            self.update_chatwindow('API Key获取失败,请检查网络连接',speecher='系统')
+            return False
+        self.update_chatwindow('GPT-3初始化中...',speecher='系统')
+        answer = self.send_and_receive_message("从现在开始,你将会成为一个名为'小沐同学'的AI学习助理,你的主要服务对象是中国高中生,因此我可能会问你有关高中学习上的问题,如果您清楚,请回复'您好,我是小沐同学,很高兴为您服务'")
+        if not answer:
+            self.update_chatwindow('GPT-3初始化失败,这可能是OpenAI服务器导致的,请更换网络环境或者稍后再试',speecher='系统')
+            return False
+        self.update_chatwindow('成功加载对话,进入聊天...',speecher='系统')
+        self.update_chatwindow(answer,speecher='小沐同学')
+        return True
+
+    def main(self):
+        # menu = ['操作菜单',['刷新对话','重置对话']]
+        layout =[
+            # [sg.Menu(menu)],
+            [sg.Text('消息框')],
+            [sg.Multiline(size=(80,20),key='_OUTPUT_',default_text='',disabled=True,autoscroll=True,text_color='blue')],
+            [sg.Text('发送新消息:')],
+            [sg.Input(size=(75,5),key='_INPUT_'),sg.Button('发送')],
+        ]
+        self.window = sg.Window('消息框',layout,font=('微软雅黑 10'),size=(700,500),return_keyboard_events=True)
+        event,value = self.window.Read(timeout=1000)
+        Internet_coonect = self.initGPT()
+        while True:
+            event,value = self.window.Read(timeout=1500)
+            if event == sg.WIN_CLOSED:
+                self.window.Close()
+                return None
+            elif event in ('\r','发送') and Internet_coonect:
+                Message = value['_INPUT_']
+                self.update_chatwindow(Message,speecher=self.username)
+                Answer = self.send_and_receive_message(Message)
+                if not Answer:
+                    Internet_coonect = False
+                else:
+                    self.update_chatwindow(Answer,speecher='小沐同学')
+                    self.window.Element('_INPUT_').Update('')

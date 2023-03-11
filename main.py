@@ -5,7 +5,7 @@ from datetime import datetime
 import PySimpleGUI as sg
 import random,time,webbrowser
 
-ver='3.2.3 - Synchronize with main branch'
+ver='3.4.0 - Chat with ChatGPT'
 
 def Error_Message():
     '''
@@ -105,13 +105,14 @@ def get_menu():
     if read_key():
         Username,_=read_key()
         menu=[
-        ['作业',['发布作业','导出',['导出成PDF文件','导出任务总清单为xlsx文件']]],
+        ['!作业',['发布作业','导出',['导出成PDF文件','导出任务总清单为xlsx文件']]],
         ['分类',['全部','按科目-语文','按科目-数学','按科目-英语','按科目-物理','按科目-化学','按科目-生物','按科目-地理','按科目-历史','按科目-政治','按科目-体育','按分类-生活','按时间-当天','按时间-当周','按状态-已超时']],
         ['账户',['!已登录: '+Username,'任务备份','任务还原','登出']],
         ['班级',['创建班级','!查看班级','!班级聊天室']],
-        ['帮助',['设置','帮助文档','关于']]
+        ['帮助',['设置','帮助文档','与AI聊天(Beta)','检查更新','关于']]
         ]
         if read_class_key():
+            menu[0][0]='作业'
             menu[3][1][0]='!创建班级'
             menu[3][1][1]='查看班级'
             menu[3][1][2]='班级聊天室'
@@ -121,7 +122,7 @@ def get_menu():
         ['分类',['全部','按科目-语文','按科目-数学','按科目-英语','按科目-物理','按科目-化学','按科目-生物','按科目-地理','按科目-历史','按科目-政治','按科目-体育','按分类-生活','按时间-当天','按时间-当周','按状态-已超时']],
         ['账户',['登录(注册)','!任务备份','!任务还原','!登出']],
         ['!班级',['创建班级','查看班级','班级聊天室']],
-        ['帮助',['设置','帮助文档','关于']]
+        ['帮助',['设置','帮助文档','与AI聊天(Beta)','检查更新','关于']]
         ]
     return menu
 
@@ -298,6 +299,9 @@ def main():
             Update_file=os.path.dirname(os.path.abspath(__file__))+r'\..\Update.exe'
             import subprocess
             subprocess.getstatusoutput(Update_file)
+        elif event=='与AI聊天(Beta)':
+            from tool import ChatWithGPT
+            ChatWithGPT().main()
         elif event=='设置':
             import Setting
             status=Setting.main()
