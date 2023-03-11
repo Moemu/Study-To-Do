@@ -111,6 +111,8 @@ class Creat_Class():
         '''
         GUI支持服务
         '''
+        if self.CheckIfBindingAClass():
+            return None
         from openpyxl import load_workbook,Workbook
         from tool import progress
         import os
@@ -201,6 +203,42 @@ class Creat_Class():
         Class_list_service.set('Creat_Time',Creat_Time)
         Class_list_service.set('Teacher',User_ID)
         Class_list_service.save()
+
+    def CheckIfBindingAClass(self):
+        '''
+        检查是否已经绑定一个班级
+        '''
+        from account import read_key,log_in
+        from plan_manager import save_plan
+        User_name, Password = read_key()
+        User_ID = log_in(User_name,Password)
+        Class_list_services = leancloud.Object.extend('Class_list').query
+        Class_list_services.equal_to('Teacher',User_ID)
+        Class_list = Class_list_services.find()
+        if len(Class_list) == 0:
+            return False
+        else:
+            from tool import progress
+            p = progress()
+            p.new()
+            Class_id = Class_list[0].get('Class_ID')
+            Class_name = Class_list[0].get('Class_Name')
+            self.save_key(Class_ID=Class_id,Class_Name=Class_name)
+            #查找该班级下的作业
+            Plan_list = leancloud.Object.extend('Homework_list').query.equal_to('Class_ID',Class_id).find()
+            for index,plan in enumerate(Plan_list):
+                p.add(int(index/len(Plan_list)*100))
+                HomeworkID = plan.get('HomeworkID')
+                des = plan.get('des')
+                etime = plan.get('etime')
+                stime = plan.get('stime')
+                sub = plan.get('sub')
+                title = plan.get('plan')
+                textname = HomeworkID + '.json'
+                save_plan(textname,sub,title,stime,etime,des,status='进行中',HomeworkID=HomeworkID)
+            p.close()
+            sg.Popup('已经绑定班级并且成功同步数据')
+            return True
 
 def View_Class():
     '''
