@@ -2,7 +2,7 @@ import leancloud,requests
 import PySimpleGUI as sg
 from plan_manager import *
 
-leancloud.init("", "") # 自行配置Leancloud的APPID和APPKEY
+leancloud.init("OzN2cISaG1cUDK9wLAw2lB4F-gzGzoHsz", "ex4DGUuGw9yQAVoRfwUpbU2p")
 sg.set_options(font=('微软雅黑 10'))
 
 def sign_up(User_name=None,password=None):

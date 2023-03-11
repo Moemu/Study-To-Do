@@ -3,7 +3,7 @@ import leancloud
 from datetime import datetime
 from account import log_in,read_key
 
-leancloud.init("","") # 自行配置Leancloud的APPID和APPKEY
+leancloud.init("OzN2cISaG1cUDK9wLAw2lB4F-gzGzoHsz", "ex4DGUuGw9yQAVoRfwUpbU2p")
 
 def Check_Class_Account() -> bool:
     import json,os
@@ -198,7 +198,7 @@ class Class_Chat:
         返回一个时间字符串以校准时间
         '''
         ClassID = Get_Class_Account()
-        Username = read_key()[0]
+        Username = read_key(Show_Status=True)
         # 绑定到MailBox类
         class_obj = leancloud.Object.extend('MailBox')
         class_obj = class_obj()
@@ -234,6 +234,9 @@ class Class_Chat:
                 return ''
 
     def main():
+        '''
+        聊天主函数
+        '''
         ClassID = Get_Class_Account()
         Username = read_key()[0]
         Class_list_services = leancloud.Object.extend('Class_list') #定位到Class_list类
@@ -267,3 +270,11 @@ class Class_Chat:
                 if Realtime_message != '':
                     Old_Message = Realtime_message
                     window.Element('_OUTPUT_').Update(Realtime_message+'\n',text_color_for_value='red',append=True)
+
+if __name__ == '__main__':
+    from tool import Run_check
+    from Setting import GetTheme
+    Run_check()
+    sg.set_options(font=('微软雅黑 10'),icon=('ico/LOGO.ico'))
+    sg.theme(GetTheme()[0])
+    Class_Chat.main()

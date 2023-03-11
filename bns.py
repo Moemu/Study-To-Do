@@ -8,7 +8,7 @@ import PySimpleGUI as sg
 from windows_toasts import ToastImageAndText4, WindowsToaster
 from datetime import datetime
 
-leancloud.init("","") # 自行配置Leancloud的APPID和APPKEY
+leancloud.init("OzN2cISaG1cUDK9wLAw2lB4F-gzGzoHsz", "ex4DGUuGw9yQAVoRfwUpbU2p")
 
 def notice(text):
     #判断Windows版本是否高于Windows 8

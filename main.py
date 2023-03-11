@@ -6,7 +6,7 @@ from datetime import datetime
 import PySimpleGUI as sg
 import random,time,webbrowser
 
-ver='3.2.2 - School Mail is Coming...'
+ver='3.3.0 - Chat with ChatGPT'
 
 def Error_Message():
     '''
@@ -112,7 +112,7 @@ def get_menu():
         ['统计',['统计数据','重置数据',['清空所有任务记录','重置在总结功能中录入的成绩'],'生成图表',['雷达图(任务完成数量占比)','饼状图(任务完成数量占比)'],'总结']],
         ['账户',['!已登录: '+Username,'任务备份','任务还原','登出']],
         ['!班级',['查看班级信息','打开班级聊天室','检查新作业']],
-        ['帮助',['设置','帮助文档','检查更新','关于']]
+        ['帮助',['设置','帮助文档','与AI聊天(Beta)','检查更新','关于']]
         ]
         if Check_Class_Account():
             menu[4][0] = '班级'
@@ -123,7 +123,7 @@ def get_menu():
         ['统计',['统计数据','重置数据',['清空所有任务记录','重置在总结功能中录入的成绩'],'生成图表',['雷达图(任务完成数量占比)','饼状图(任务完成数量占比)'],'总结']],
         ['账户',['登录(注册)','!任务备份','!任务还原','!登出']],
         ['!班级',['查看班级信息','打开班级聊天室','检查新作业']],
-        ['帮助',['设置','帮助文档','检查更新','关于']]
+        ['帮助',['设置','帮助文档','与AI聊天(Beta)','检查更新','关于']]
         ]
     return menu
 
@@ -327,6 +327,9 @@ def main():
             Update_file=os.path.dirname(os.path.abspath(__file__))+r'\..\Update.exe'
             import subprocess
             subprocess.getstatusoutput(Update_file)
+        elif event=='与AI聊天(Beta)':
+            from tool import ChatWithGPT
+            ChatWithGPT().main()
         elif event=='设置':
             import Setting
             status=Setting.main()
