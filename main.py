@@ -6,7 +6,7 @@ from datetime import datetime
 import PySimpleGUI as sg
 import random,time,webbrowser
 
-ver='3.3.0 - Chat with ChatGPT'
+ver='3.3.1 - Chat with ChatGPT'
 
 def Error_Message():
     '''

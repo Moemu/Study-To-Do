@@ -289,8 +289,21 @@ class ChatWithGPT():
         self.update_chatwindow(answer,speecher='小沐同学')
         return True
 
+    def beforeuse_windows(self):
+        layout = [
+            [sg.Text('使用前提示:',font=('微软雅黑 15'))],
+            [sg.Text('1. 该应用基于OpenAI公布的api实现,但由于OpenAI的服务器问题,在国内可能无法访问,请过段时间再试',font=('微软雅黑 10'))],
+            [sg.Text('2. 应用使用期间无响应是正常现象,请不要关闭窗口',font=('微软雅黑 10'))],
+            [sg.Text('3. 该应用使用GPT 3.5 Turbo模型,因此效果可能有些差,请不要介意',font=('微软雅黑 10'))],
+            [sg.Button('继续',font=('微软雅黑 10'))]
+        ]
+        window = sg.Window('使用前提示',layout,font=('微软雅黑 10'))
+        event,value = window.Read()
+        window.close()
+
     def main(self):
         # menu = ['操作菜单',['刷新对话','重置对话']]
+        self.beforeuse_windows()
         layout =[
             # [sg.Menu(menu)],
             [sg.Text('消息框')],
