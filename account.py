@@ -1,3 +1,7 @@
+'''
+提供在线服务
+'''
+
 import leancloud,requests
 import PySimpleGUI as sg
 from plan_manager import *
@@ -5,13 +9,22 @@ from plan_manager import *
 leancloud.init("OzN2cISaG1cUDK9wLAw2lB4F-gzGzoHsz", "ex4DGUuGw9yQAVoRfwUpbU2p")
 sg.set_options(font=('微软雅黑 10'))
 
-def sign_up(User_name=None,password=None):
+def sign_up(User_name:str, password:str) -> (bool|str):
+    '''
+    注册一个账号
+
+    Args:
+        User_name (str): 用户名
+        password (str): 密码
+    Returns:
+        注册成功返回True,否则返回False或者报错字符串
+    '''
     account_service = leancloud.User()
     account_service.set_username(User_name)
     account_service.set_password(password)
     try:
         account_service.sign_up()
-        print('Sign up done')
+        print('[Info] Sign up done')
         return True
     except leancloud.errors.LeanCloudError:
         return False
@@ -20,11 +33,20 @@ def sign_up(User_name=None,password=None):
     except requests.exceptions.ConnectionError:
         return 'InternetError'
 
-def log_in(User_name=None,password=None):
+def log_in(User_name:str, password:str) -> (str|bool):
+    '''
+    登录一个账号
+
+    Args:
+        User_name (str): 用户名
+        password (str): 密码
+    Returns:
+       登录成功返回True,否则返回False或者报错字符串
+    '''
     user = leancloud.User()
     try:
         user.login(username=User_name, password=password)
-        print('Log in done')
+        print('[Info] Log in done')
         user_id=leancloud.User.get_current()
         return user_id
     except leancloud.errors.LeanCloudError:
@@ -34,7 +56,14 @@ def log_in(User_name=None,password=None):
     except requests.exceptions.ConnectionError:
         return 'InternetError'
 
-def save_key(Username=None,password=None):
+def save_key(Username:str,password:str) -> None:
+    '''
+    保存登录账号和密码
+
+    Args:
+        Username (str): 用户名
+        password (str): 密码
+    '''
     import json
     User_ID=log_in(Username,password)
     User_services = leancloud.Object.extend('Class_member')
@@ -59,7 +88,15 @@ def save_key(Username=None,password=None):
     with open('data/key.json','w') as f:
         f.write(json.dumps(key))
 
-def read_key(Show_Status=False) -> list:
+def read_key(Show_Status:bool=False) -> list:
+    '''
+    读取登录账号和密码
+
+    Args:
+        Show_Status (bool): 是否显示用户名
+    Returns:
+        如果文件存在返回用户名和密码,否则返回False
+    '''
     import json,os
     if os.path.isfile('data/key.json'):
         with open('data/key.json','r') as f:
@@ -67,7 +104,7 @@ def read_key(Show_Status=False) -> list:
         Username=key['User_name']
         Realname=key['Realname']
         if Show_Status == True:
-            print('Realname -> ',Realname)
+            print('[Info] This user is a student. Realname -> ',Realname)
             if Realname != None:
                 return Realname
             else:
@@ -77,7 +114,10 @@ def read_key(Show_Status=False) -> list:
     else:
         return False
 
-def send_plans():
+def send_plans() -> None:
+    """
+    将本地的任务列表发送到云端
+    """
     import time
     import PySimpleGUI as sg
     User_name,password=read_key()
@@ -122,8 +162,12 @@ def send_plans():
         progress_bar.UpdateBar(i + 1)
     window.Close()
     sg.Popup('已完成数据在云端的备份操作')
+    return None
 
-def get_plans():
+def get_plans() -> None:
+    """
+    从云端获取任务列表
+    """
     from plan_manager import get_newplan_name,save_plan
     import PySimpleGUI as sg
     import shutil,os
@@ -160,8 +204,12 @@ def get_plans():
             save_plan(get_newplan_name(),sub,text,stime,etime,des,status)
         else:
             save_plan(get_newplan_name(),sub,text,detail=des,status=status)
+    return None
 
-def log_in_gui():
+def log_in_gui() -> None:
+    """
+    登录或注册GUI
+    """
     layout=[
         [sg.Text('用户名')],
         [sg.Input()],
@@ -229,6 +277,9 @@ def log_in_gui():
         return None
 
 def log_out():
+    """
+    登出操作
+    """
     from Student import Check_Class_Account
     import os
     if Check_Class_Account():
@@ -240,9 +291,10 @@ def log_out():
                 if get_plan_info(plan_list.index(plan),'HomeworkID'):
                     Remove_plan_list.append(plan)
             for plan in Remove_plan_list:
-                print('Remove: ',plan)
+                print('[Info]Remove: ',plan)
                 os.remove('plan/'+plan)
         else:
             return None
     os.remove('data/key.json')
     sg.Popup('已登出...')
+    return None

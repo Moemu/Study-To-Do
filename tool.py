@@ -1,6 +1,7 @@
 import PySimpleGUI as sg
+import asyncio
 
-def check_time(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10):
+def check_time(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10) -> bool|tuple:
     '''
     将时间整合并检查导入时间是否合法
     '''
@@ -49,9 +50,12 @@ def split_time(times):
     return sty,stM,std,sth,stm,ety,etM,etd,eth,etm
 
 def count_time(stime,etime):
-    '''
-    自动计算时间差
-    '''
+    """
+    计算两个时间之间的间隔
+    :param stime: 开始时间
+    :param etime: 结束时间
+    :return: 间隔天数
+    """
     if stime in ('无',None):
         return 0
     from datetime import datetime
@@ -173,11 +177,11 @@ def plan_folder_check():
         listdir=os.listdir('plan')
         for index_num in range(len(listdir)):
             try:
-                print('Geting info from: ',listdir[index_num])
+                print('[Info] Geting info from: ',listdir[index_num])
                 get_plan_info(index_num,'status')
             except:
                 if get_plan_info(num=None,mode='status',Path=os.listdir('plan')[index_num])==False:
-                    print('Remove: ',os.listdir('plan')[index_num])
+                    print('[Warning] A File is error. Remove: ',os.listdir('plan')[index_num])
                     os.remove('plan/'+os.listdir('plan')[index_num])
                 return False
         return True
@@ -193,7 +197,7 @@ def Run_check():
     '''
     #程序数据文件夹检查
     import os,json
-    print('Start Run_check...')
+    print('[Info] Start Run_check...')
     # if os.path.isdir('ico')==True and os.path.isdir(os.getenv('APPDATA')+'\Study to do\ico')==False:
     #     print('You are running by code')
     #     import shutil
@@ -228,73 +232,71 @@ def Run_check():
             f.write(json.dumps(setting, sort_keys=True, indent=4, separators=(',', ': ')))
     #依赖文件检查(learn_sen.txt)
     if os.path.isfile('data/learn_sen.txt')==False:
-        print('learn_sen.txt fail')
+        print('[Warning] learn_sen.txt fail')
         default_sen('learn_sen')
     #依赖文件检查(hitokoto.txt)
     if os.path.isfile('data/hitokoto.txt')==False:
-        print('hitokoto.txt fail')
+        print('[Warning] hitokoto.txt fail')
         default_sen('hitokoto')
     #检查任务文件夹是否出错
     plan_folder_check()
-    print('Run_check pass')
+    print('[Info] Run_check pass')
 
 class ChatWithGPT():
     '''
     Chat with GPT
     '''
     def __init__(self):
-        Run_check()
         from account import read_key
-        self.username = read_key(Show_Status=True)
-        if not self.username:
-            self.username = '你'
+        self.username = read_key(Show_Status=True) or '你'
         self.conversation_list = []
-        
+        self.max_retries = 3
+
     def update_chatwindow(self,text,speecher):
         self.window.Element('_OUTPUT_').Update(speecher+': '+text+'\n',text_color_for_value='black',append=True)
         self.window.refresh()
 
-    def send_and_receive_message(self,message):
-        import openai
-        self.conversation_list.append({"role":"user","content":message})
-        openai.api_key = self.GPTKey
+    async def send_and_receive_message(self,message, retries=0):
+        question = message
         try:
-            completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo", 
-            messages=self.conversation_list
-            )
-            answer = completion.choices[0].message['content']
+            result = await self.chatbot.ask(prompt=question)
         except:
-            self.update_chatwindow('Ai连接失败,请检查网络连接',speecher='系统')
-            return False
-        self.conversation_list.append({"role":"assistant","content":answer})
-        return answer
+            if retries < self.max_retries:
+                self.update_chatwindow('连接Microsoft(Sydney)服务器失败，正在进行第%s次尝试...' % (retries+1),speecher='系统')
+                return await self.send_and_receive_message(message, retries=retries+1)
+            else:
+                self.update_chatwindow('连接Microsoft(Sydney)服务器失败,请检查您的网络连接',speecher='系统')
+                return False
+        return result["item"]["messages"][1]["adaptiveCards"][0]["body"][0]["text"]
 
-    def initGPT(self):
+    def getcookie(self):
+        self.update_chatwindow('获取Cookie....',speecher='系统')
         import leancloud
         leancloud.init("OzN2cISaG1cUDK9wLAw2lB4F-gzGzoHsz", "ex4DGUuGw9yQAVoRfwUpbU2p")
-        self.update_chatwindow('API Key获取中...',speecher='系统')
-        try:
-            self.GPTKey = leancloud.Object.extend('APIKey').query.first().get('APIKey')
-            self.update_chatwindow('API Key获取成功', speecher='系统')
-        except:
-            self.update_chatwindow('API Key获取失败,请检查网络连接',speecher='系统')
-            return False
-        self.update_chatwindow('GPT-3初始化中...',speecher='系统')
-        answer = self.send_and_receive_message("从现在开始,你将会成为一个名为'小沐同学'的AI学习助理,你的主要服务对象是中国高中生,因此我可能会问你有关高中学习上的问题,如果您清楚,请回复'您好,我是小沐同学,很高兴为您服务'")
+        cookie = leancloud.Object.extend('APIKey').query.find()[0].get('APIKey')
+        with open('data/cookie.json','w') as f:
+            f.write(cookie)
+        return None
+    
+    def initGPT(self):
+        from EdgeGPT import Chatbot,create_session
+        self.getcookie()
+        self.chatbot = Chatbot(cookiePath='data/cookie.json')
+        self.session = create_session()
+        self.update_chatwindow('连接Microsoft(Sydney)服务器',speecher='系统')
+        answer = asyncio.run(self.send_and_receive_message("从现在开始,我可能会问你有关高中学习上的问题,如果您清楚,请给我一个问候"))
         if not answer:
-            self.update_chatwindow('GPT-3初始化失败,这可能是OpenAI服务器导致的,请更换网络环境或者稍后再试',speecher='系统')
             return False
         self.update_chatwindow('成功加载对话,进入聊天...',speecher='系统')
-        self.update_chatwindow(answer,speecher='小沐同学')
+        self.update_chatwindow(answer,speecher='Sydney')
         return True
 
     def beforeuse_windows(self):
         layout = [
             [sg.Text('使用前提示:',font=('微软雅黑 15'))],
-            [sg.Text('1. 该应用基于OpenAI公布的api实现,但由于OpenAI的服务器问题,在国内可能无法访问,请过段时间再试',font=('微软雅黑 10'))],
+            [sg.Text('1. 该应用基于Microsoft未公布的api实现,但由于Microsoft的服务器问题,在国内可能无法访问或者比较慢,请过段时间再试',font=('微软雅黑 10'))],
             [sg.Text('2. 应用使用期间无响应是正常现象,请不要关闭窗口',font=('微软雅黑 10'))],
-            [sg.Text('3. 该应用使用GPT 3.5 Turbo模型,因此效果可能有些差,请不要介意',font=('微软雅黑 10'))],
+            [sg.Text('3. 该应用使用Newbing(GPT 3.5)模型,因此效果可能有些差,请不要介意',font=('微软雅黑 10'))],
             [sg.Button('继续',font=('微软雅黑 10'))]
         ]
         window = sg.Window('使用前提示',layout,font=('微软雅黑 10'))
@@ -313,7 +315,11 @@ class ChatWithGPT():
         ]
         self.window = sg.Window('消息框',layout,font=('微软雅黑 10'),size=(700,500),return_keyboard_events=True)
         event,value = self.window.Read(timeout=1000)
-        Internet_coonect = self.initGPT()
+        try:
+            Internet_coonect = self.initGPT()
+        except:
+            Internet_coonect = False
+            self.update_chatwindow('连接失败，这可能是由于Microsoft服务器设置的防火墙导致的。',speecher='系统')
         while True:
             event,value = self.window.Read(timeout=1500)
             if event == sg.WIN_CLOSED:
@@ -322,9 +328,13 @@ class ChatWithGPT():
             elif event in ('\r','发送') and Internet_coonect:
                 Message = value['_INPUT_']
                 self.update_chatwindow(Message,speecher=self.username)
-                Answer = self.send_and_receive_message(Message)
+                Answer = asyncio.run(self.send_and_receive_message(Message))
                 if not Answer:
                     Internet_coonect = False
                 else:
-                    self.update_chatwindow(Answer,speecher='小沐同学')
+                    self.update_chatwindow(Answer,speecher='Sydney')
                     self.window.Element('_INPUT_').Update('')
+
+if __name__ == '__main__':
+    Run_check()
+    ChatWithGPT().main()

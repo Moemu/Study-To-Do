@@ -10,7 +10,13 @@ from datetime import datetime
 
 leancloud.init("OzN2cISaG1cUDK9wLAw2lB4F-gzGzoHsz", "ex4DGUuGw9yQAVoRfwUpbU2p")
 
-def notice(text):
+def notice(text:str) -> None:
+    '''
+    发送通知
+
+    Args:
+        text (str): 通知内容
+    '''
     #判断Windows版本是否高于Windows 8
     if int(platform.release()) >= 8:
         newToast = ToastImageAndText4()
@@ -24,7 +30,10 @@ def notice(text):
         sg.popup_notify(text,title='学习待办任务提醒',display_duration_in_ms=5000)
     return None
 
-def check_plan_status():
+def check_plan_status() -> None:
+    '''
+    检查任务完成状态
+    '''
     import os
     from datetime import datetime, timedelta
     from plan_manager import get_plan_info, read_plan_list
@@ -40,14 +49,13 @@ def check_plan_status():
             ready_done+=1
     if ready_done!=0:
         notice("您有{}个任务将于10分钟后截止,请尽快完成".format(ready_done))
-        print('Message Send!')
+        print('[Info] Message Send!')
 
-def Check_New_Homework():
+def Check_New_Homework() -> None:
     '''
     检查新作业
     '''
     import os
-
     from account import log_in, read_key
     from plan_manager import save_plan
     from Student import Get_Class_Account
@@ -90,17 +98,28 @@ def Check_New_Homework():
     notice('有新的作业,请检查!')
     return None
 
-def Format_Message(CreateAt,Username,Message):
+def Format_Message(CreateAt,Username,Message) -> str:
     '''
-    格式化信息
+    格式化信息,返回信息头字符串
+
+    Args:
+        CreateAt (datetime): 信息创建时间
+        Username (str): 用户名
+        Message (str): 信息内容
+    Returns:
+        str: 格式化后的信息头字符串
     '''
     CreateAt = datetime.strftime(CreateAt,'%m-%d %H:%M:%S')
     return Username[5:]+' 说: '+Message
 
-def get_realtime_message(Old_Message_CreatedAt) -> str:
+def get_realtime_message(Old_Message_CreatedAt:datetime) -> str:
     '''
     获取到最新的一条信息
-    :return 返回最新的一条信息,顺序为Message,Username,createdAt
+
+    Args:
+        Old_Message_CreatedAt (datetime): 上一条信息的创建时间
+    Returns:
+        str: 最新的一条信息的创建时间
     '''
     from Student import Get_Class_Account
     if Get_Class_Account():
@@ -124,6 +143,9 @@ def get_realtime_message(Old_Message_CreatedAt) -> str:
             return Old_Message_CreatedAt
 
 def main():
+    '''
+    后台通知服务主函数
+    '''
     import time
     os.chdir(os.getenv('APPDATA')+r'\Study to do')
     Old_Message_CreatedAt = datetime.now().replace(tzinfo=pytz.UTC)

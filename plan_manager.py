@@ -1,8 +1,17 @@
+'''
+任务操作函数库
+'''
+
 import os,json
 from tool import check_time
 import PySimpleGUI as sg
 
-def time_get():
+def time_get() -> tuple:
+    '''
+    获取5组数字，分别为一定时间内的所有年，月，日，时，分组成的列表
+    Returns:
+        tuple: (year,mon,day,hour,mins)
+    '''
     mins=[]
     for i in range(0,60):
         if i <=9:
@@ -37,10 +46,11 @@ def time_get():
         year.append(i)
     return year,mon,day,hour,mins
 
-def get_newplan_name():
+def get_newplan_name() -> str:
     '''
     获取到新任务的文件名
-    返回: 'xx.json' -> str
+    Returns:
+        str: 'xx.json'
     '''
     from tool import repair_num
     try:
@@ -62,7 +72,10 @@ def get_newplan_name():
     
 def time_gets() -> tuple:
     '''
-    返回时间设定的初始值
+    获取设置任务时间时设定的初始值
+    Returns:
+        tuple: (Now_time_year,Now_time_mon,Now_time_day,Now_time_hour,Now_time_min,
+        future_time_year,future_time_mon,future_time_day,future_time_hour,future_time_min)
     '''
     import time,datetime
     Now_time=time.localtime()
@@ -79,6 +92,10 @@ def time_gets() -> tuple:
 def time_seter(value:str) -> str:
     '''
     截止时间设定,返回结束时间
+    Args:
+        value (str): 截止时间(如: 10分钟后)
+    Returns:
+        str: 结束时间(如: 2021-07-01 12:00)
     '''
     from datetime import datetime,timedelta
     nowtime = datetime.now()
@@ -96,15 +113,26 @@ def time_seter(value:str) -> str:
 def save_plan(txtname:str,sub:str,plan:str,
     stime=None,etime=None,
     detail=None,status='进行中',
-    HomeworkID=False):
+    HomeworkID=False) -> None:
     '''
     保存任务
-    导入变量列表: 文档名,科目,计划,开始结束时间,描述(detail),状态(status)
+    Args:
+        txtname (str): 任务文件名(如: 01.json)
+        sub (str): 任务科目
+        plan (str): 任务标题
+        stime (str, optional): 任务开始时间. Defaults to None.
+        etime (str, optional): 任务结束时间. Defaults to None.
+        detail (str, optional): 任务描述. Defaults to None.
+        status (str, optional): 任务状态. Defaults to '进行中'.
+        HomeworkID (bool, optional): 作业ID. Defaults to False.
     '''
     with open('plan/'+txtname,mode='w') as f:
         f.write(json.dumps({'sub':sub,'text':plan,'stime':stime,'etime':etime,'des':detail,'status':status,'HomeworkID':HomeworkID},sort_keys=True, indent=4, separators=(',', ': ')))
 
-def add_plan():
+def add_plan() -> None:
+    '''
+    添加任务页面
+    '''
     import time,datetime
     layout=[
         [sg.Text('科目:')],
@@ -119,7 +147,7 @@ def add_plan():
     ]
     window=sg.Window('新建自定义任务',layout=layout,icon='ico/LOGO.ico',font=('微软雅黑 10'))
     event,value=window.Read()
-    print('任务新建输出: ',value)
+    print('[Info] 任务新建输出: ',value)
     if event==sg.WIN_CLOSED:
         return None
     sub=value[0]
@@ -157,7 +185,7 @@ def add_plan():
         Glayout.append([sg.Button('提交',font=('微软雅黑 8'))])
         Gwindow=sg.Window('高级设置',layout=Glayout,icon='ico/LOGO.ico')
         event,values=Gwindow.Read()
-        print('任务高级页面输出: ',values)
+        print('[Info] 任务高级页面输出: ',values)
         if event==sg.WIN_CLOSED:
             window.Close()
             Gwindow.Close()
@@ -175,9 +203,11 @@ def add_plan():
     sg.popup('计划添加成功~',font=('微软雅黑 10'))
     window.Close()
 
-def read_plan_list():
+def read_plan_list() -> list:
     '''
     获取到任务列表
+    Returns:
+        list: 任务列表
     '''
     dirtree=os.listdir('plan')
     txtname_list=[]
@@ -186,7 +216,7 @@ def read_plan_list():
             txtname_list.append(txtname)
     return txtname_list
 
-def get_plan_info(num,mode:str,Path=None):
+def get_plan_info(num:str|int,mode:str,Path=None):
     '''
     获取任务信息
     :num 任务索引号
@@ -218,18 +248,31 @@ def get_plan_info(num,mode:str,Path=None):
         info=json.loads(f.read())[mode]
     return info
 
-def read_plan_with_sub(sub):
+def read_plan_with_sub(sub) -> list:
+    '''
+    按照传入的科目返回符合要求的任务文件列表
+    Args:
+        sub (str): 科目
+    Returns:
+        list: 任务文件列表
+    '''
     dirtree=os.listdir('plan')
     pass_plans=[]
     for txtnum in range(len(dirtree)):
         plan_sub=get_plan_info(txtnum,'sub')
         if plan_sub==sub:
-            print('pass: ',txtnum)
+            print('[Info] Loading Matched Plan: ',txtnum)
             pass_plans.append(txtnum)
-    print(pass_plans)
     return pass_plans
 
-def read_plan_with_time(time):
+def read_plan_with_time(time) -> list:
+    '''
+    按照传入的时间返回符合要求的任务文件列表
+    Args:
+        time (str): 时间(如: 2021-07-01)
+    Returns:
+        list: 任务文件列表
+    '''
     dirtree=os.listdir('plan')
     pass_plans=[]
     for txtnum in range(len(dirtree)):
@@ -239,9 +282,13 @@ def read_plan_with_time(time):
                 pass_plans.append(txtnum)
     return pass_plans
 
-def read_plan_with_setting(setting):
+def read_plan_with_setting(setting) -> list:
     '''
     按照传入的设置变量返回符合要求的任务文件列表
+    Args:
+        setting (str): 设置变量(如: 语文/当天/已超时)
+    Returns:
+        list: 任务文件列表
     '''
     try:
         setting=setting.split('-')[1]
@@ -270,7 +317,7 @@ def read_plan_with_setting(setting):
                 txtname_list.append(num)
     return txtname_list
 
-def change_plan_time(num,st=False,et=False):
+def change_plan_time(num,st=False,et=False) -> None:
     '''
     更改指定任务的开始或完成时间, 使其适应当前时间
     num -> 任务索引
@@ -292,7 +339,7 @@ def change_plan_time(num,st=False,et=False):
             f.write(json.dumps(data,sort_keys=True, indent=4, separators=(',', ': ')))
     return None
 
-def Complete_plan(num,mode='Now'):
+def Complete_plan(num,mode='Now') -> None:
     '''
     对任务进行完成操作
     num -> 任务索引
@@ -304,7 +351,7 @@ def Complete_plan(num,mode='Now'):
     if get_plan_info(num,'HomeworkID'):
         from Student import Finish_Homework
         try:
-            print('Homework Status -> ',check_plan_time(num))
+            print('[Info] Homework Status -> ',check_plan_time(num))
             Finish_Homework(HomeworkID = get_plan_info(num,'HomeworkID'),Overtime = check_plan_time(num))
         except ConnectionError:
             sg.Popup('网络异常,请检查您的网络连接')
@@ -316,7 +363,7 @@ def Complete_plan(num,mode='Now'):
         change_plan_time(num,et=True)
     return None
 
-def check_plan_time(num):
+def check_plan_time(num) -> bool:
     '''
     检查任务是否超时
     若超时,返回True
@@ -333,7 +380,14 @@ def check_plan_time(num):
     else:
         return False
 
-def show_plan(num):
+def show_plan(num:str|int) -> str:
+    '''
+    获取展示时的任务信息
+    Args:
+        num (str): 任务索引号
+    Returns:
+        str: 任务信息
+    '''
     txtname=os.listdir('plan')[int(num)]
     with open('plan/'+txtname,'r') as f:
         txt=f.read()
@@ -351,6 +405,10 @@ def show_plan(num):
 def get_plan_time(num) -> str:
     '''
     获取任务完成周期
+    Args:
+        num (str): 任务索引号
+    Returns:
+        str: 任务完成周期
     '''
     from datetime import datetime
     txtname=os.listdir('plan')[int(num)]
@@ -367,9 +425,11 @@ def get_plan_time(num) -> str:
     except:
         return None
 
-def change_plan(num):
+def change_plan(num) -> None:
     '''
     更改任务页面
+    Args:
+        num (str): 任务索引号
     '''
     from tool import split_time,repair_num
     txtname=os.listdir('plan')[int(num)]
@@ -424,7 +484,7 @@ def change_plan(num):
         Glayout.append([sg.Button('提交',font=('微软雅黑 8'))])
         Gwindow=sg.Window('高级设置',layout=Glayout,icon='ico/LOGO.ico')
         event,values=Gwindow.Read()
-        print('任务高级页面输出: ',values)
+        print('[Info] 任务高级页面输出: ',values)
         if event==sg.WIN_CLOSED:
             window.Close()
             Gwindow.Close()

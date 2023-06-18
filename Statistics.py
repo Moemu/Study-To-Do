@@ -1,4 +1,11 @@
+'''
+统计函数库
+'''
+
 def Creft_file():
+    '''
+    创建存放数据用Json文件
+    '''
     import json
     text={
         '创建的任务数':0,
@@ -19,6 +26,9 @@ def Creft_file():
         f.write(json.dumps(text, sort_keys=True, indent=4, separators=(',', ': ')))
 
 def Update_plan_data():
+    '''
+    更新统计数据
+    '''
     from tool import count_time,count_list
     import json
     #获取各任务值列表
@@ -54,6 +64,9 @@ def Update_plan_data():
     return None
 
 def Show_data():
+    '''
+    显示统计数据
+    '''
     import PySimpleGUI as sg
     import json
     from tool import progress
@@ -78,9 +91,10 @@ def Show_data():
     windows.Read()
     windows.Close()
 
+#chart类：绘制图表
 class chart:
     def generate_data():
-        from print import plan_log
+        from output import plan_log
         plan_log.main(GUI=False)
         return None
 
@@ -295,17 +309,17 @@ def summary():
                 Choose_sub[3]:values[3],
                 Choose_sub[4]:values[4],
                 Choose_sub[5]:values[5]}
-        print('Get score data -> ',data)
+        print('[Info] Get score data -> ',data)
         with open('data/User_info.json','w') as f:
             f.write(json.dumps(data,sort_keys=True,indent=4,separators=(',', ': ')))
         sg.Popup('感谢!所有的数据已收集完毕,现在让我们开始统计分析')
     #---分界线---
     Progress = progress()
     Progress.new()
-    print('Loading data...')
+    print('[Info] Loading data...')
     Update_plan_data()
     Progress.add(30)
-    print('Statistics.json is readying...')
+    print('[Info] Statistics.json is readying...')
     with open('data/User_info.json','r') as f:
         data = json.loads(f.read())
     Choose_sub = list(data.keys())
@@ -328,9 +342,9 @@ def summary():
     if all_frequency<3:
         sg.Popup('完成的任务太少,还是多完成一些任务再来吧')
         return None
-    print('Choose_sub -> ',Choose_sub)
-    print('sub_score -> ',sub_score)
-    print('frequency ->',frequency)
+    print('[Info] Choose_sub -> ',Choose_sub)
+    print('[Info] sub_score -> ',sub_score)
+    print('[Info] frequency ->',frequency)
     #初始化列表
     max_frequency_sub=[]
     max_frequency_value=[]
@@ -366,10 +380,10 @@ def summary():
         sub_idx = max_sub_value.index(sub)
         max_sub_score[i] = temp_max_sub_score[sub_idx]
     Progress.add(70)
-    print('max_frequency_sub -> ',max_frequency_sub)
-    print('max_frequency_value -> ',max_frequency_value)
-    print('max_sub_score -> ',max_sub_score)
-    print('max_sub_value -> ',max_sub_value)
+    print('[Info] max_frequency_sub -> ',max_frequency_sub)
+    print('[Info] max_frequency_value -> ',max_frequency_value)
+    print('[Info] max_sub_score -> ',max_sub_score)
+    print('[Info] max_sub_value -> ',max_sub_value)
     chart.polars(max_frequency_value,max_sub_score,'各学科所占时间之比',max_frequency_sub)
     Progress.add(80)
     count_time=str((datetime.now()-datetime.strptime(Early_time,'%Y%m%d')).days)

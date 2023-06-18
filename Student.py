@@ -1,3 +1,6 @@
+'''
+学生端与教师端交互函数
+'''
 import PySimpleGUI as sg
 import leancloud
 from datetime import datetime
@@ -6,6 +9,9 @@ from account import log_in,read_key
 leancloud.init("OzN2cISaG1cUDK9wLAw2lB4F-gzGzoHsz", "ex4DGUuGw9yQAVoRfwUpbU2p")
 
 def Check_Class_Account() -> bool:
+    '''
+    检查是否绑定班级
+    '''
     import json,os
     if os.path.isfile('data/key.json'):
         with open('data/key.json','r') as f:
@@ -29,7 +35,6 @@ def View_Class():
     查看班级信息
     '''
     Class_ID = Get_Class_Account()
-    print(Class_ID)
     # 获取班级名
     Class_list_services = leancloud.Object.extend('Class_list') #定位到Class_list类
     Class_list_service = Class_list_services.query #查询服务
@@ -49,7 +54,6 @@ def View_Class():
     text = ', '
     texts = ''
     while stu!=[]:
-        print('stu ->',stu)
         texts+=(text.join(stu[:10])+'\n')
         del stu[:10]
     layout = [
@@ -76,7 +80,7 @@ def Check_New_Homework():
     Homework_list_services = leancloud.Object.extend('Homework_list') #定位到Homework_list类
     Homework_list_service = Homework_list_services.query #查询服务
     Homework_list = Homework_list_service.equal_to('Class_ID',Get_Class_Account()).find() #查询该班级ID
-    print('Homework_list -> ',Homework_list)
+    print('[Info] All Homework_list -> ',Homework_list)
     #判断是否在作业列表中含有作业
     if Homework_list == []:
         sg.Popup('没有新作业')
@@ -88,7 +92,7 @@ def Check_New_Homework():
     Homework_Status_services = leancloud.Object.extend('Homework_Status') #定位到Homework_Status类
     Homework_Status_service = Homework_Status_services.query #查询服务
     Homework_Done_list = Homework_Status_service.equal_to('User_ID',UserID).find() #查询该用户ID
-    print('Homework_Done_list -> ',Homework_Done_list)
+    print('[Info] Done Homework_list -> ',Homework_Done_list)
     for h in Homework_Done_list:
         HomeworkID_list.remove(h.get('HomeworkID'))
     OldHomeworkID_list = HomeworkID_list.copy()
@@ -96,7 +100,7 @@ def Check_New_Homework():
         Plan_list = os.listdir('plan')
         if h+'.json' in Plan_list:
             HomeworkID_list.remove(h)
-    print('Homework_list -> ',Homework_list)
+    print('[Info] UnFinished Homework_list -> ',Homework_list)
     if HomeworkID_list == []:
         sg.Popup('没有新作业')
         return None
@@ -265,7 +269,7 @@ class Class_Chat:
                 window.Element('_OUTPUT_').Update(Old_Message+'\n',text_color_for_value='black',append=True)
                 window.Element('_INPUT_').Update('')
             elif event == '__TIMEOUT__':
-                print('Updating Message...')
+                print('[Info] Updating Message...')
                 Realtime_message = Class_Chat.get_realtime_message(ClassID,Old_Message)
                 if Realtime_message != '':
                     Old_Message = Realtime_message

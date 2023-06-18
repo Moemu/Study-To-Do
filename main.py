@@ -6,14 +6,15 @@ from datetime import datetime
 import PySimpleGUI as sg
 import random,time,webbrowser
 
-ver='3.3.1 - Chat with ChatGPT'
+ver='3.3.5 - Chat with Sydeny'
 
-def Error_Message():
+def Error_Message() -> None:
     '''
-    错误报告
+    弹出错误报告窗口
     '''
     import traceback,sys
     exc_type, exc_value, exc_traceback = sys.exc_info()
+    print('[Error] ',traceback.format_exc())
     layout = [
         [sg.Text('哦不!!!',font = ('微软雅黑 15'))],
         [sg.Text('我们似乎遇到了些问题, 导致程序被迫停止运行')],
@@ -51,7 +52,13 @@ def Error_Message():
         event,value = window.Read()
         
 
-def choice_sen(showsen):
+def choice_sen(showsen:str) -> str:
+    '''
+    Args:
+        showsen: 设置项,预期值为'学习技巧','一言(本地)'或'日常问候语'
+    Returns:
+        返回一个字符串,用于主页面显示
+    '''
     if showsen=='学习技巧':
         with open('data/learn_sen.txt',encoding='utf-8') as l:
             show_sen=random.choice(l.readlines()).split('\n')[0]
@@ -79,6 +86,11 @@ def choice_sen(showsen):
 def note(et:str) -> str:
     '''
     给部分任务添加备注
+
+    Args:
+        et: 截止时间(%Y-%m-%d %H:%M)
+    Returns:
+        返回一个字符串,用于主页面显示
     '''
     etd = datetime.strptime(et,'%Y-%m-%d %H:%M')
     ntd = datetime.now()
@@ -98,9 +110,12 @@ def note(et:str) -> str:
     text+='截止至:'+mon+'/'+day
     return text
 
-def get_menu():
+def get_menu() -> list:
     '''
     根据登录状态获取菜单列表
+
+    Returns:
+        返回一个列表,用于主页面显示
     '''
     from account import read_key
     from Student import Check_Class_Account
@@ -127,22 +142,35 @@ def get_menu():
         ]
     return menu
 
-def Button_image(path=None,key=None):
+def Button_image(path=None,key=None) -> sg.Button:
+    '''
+    生成一个带图标的按钮
+
+    Args:
+        path: 图标路径
+        key: 按钮的key
+    Returns:
+        返回一个sg.Button对象
+    '''
     return sg.Button(tooltip=key,button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename=path,key=key)
 
 def main():
+    '''
+    Study To Do 主函数
+    '''
     from tool import Run_check
-    Run_check()
+    Run_check() #检查文件完整性
     sg.set_options(font=('微软雅黑 10'),icon=('ico/LOGO.ico'))
     sg.theme(GetTheme()[0])
     showsen,showplan,size,backstage_status,DarkMode=read_setting()
+    # UI部分
     menu=get_menu()
     layout=[
         [sg.Menu(menu,font=('微软雅黑 8'),background_color=GetTheme()[1])],
         [sg.Text('所有任务',font=('微软雅黑 15'))],
         [sg.Text(choice_sen(showsen),font=('微软雅黑 8'))]
         ]
-    No_num=0
+    PlanCount=1
     try:
         if showplan=='全部':
             txtname_list=read_plan_list() #传入计划列表
@@ -152,9 +180,8 @@ def main():
         if txtname_list==[]:
             layout.append([sg.Image(filename='ico/empty-box.png')])
         else:
-            show_plan_num=0
-            a=0
-            print('txtname_list -> ',txtname_list)
+            IsAnyPlan=False
+            print('[Info] txtname_list -> ',txtname_list)
             for num in txtname_list:
                 plan_name=num
                 if get_plan_info(plan_name,'status')!='已结束':
@@ -164,46 +191,45 @@ def main():
                         linelayout=[]
                         if check_plan_time(plan_name)==True:
                             #超时任务
-                            linelayout.append([sg.Text(str(No_num+1)+'. '+text,font=('微软雅黑 12'),text_color='red'),sg.Push(),
+                            linelayout.append([sg.Text(str(PlanCount)+'. '+text,font=('微软雅黑 12'),text_color='red'),sg.Push(),
                             sg.Button(tooltip='完成',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/done.png',key='w'+str(num)),
                             sg.Button(tooltip='查看',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/menu.png',key='c'+str(num))])
                             linelayout.append([sg.Text(note(et),font=('微软雅黑 8'),text_color='red')])
                         else:
                             #未超时任务
-                            linelayout.append([sg.Text(str(No_num+1)+'. '+text,font=('微软雅黑 12')),sg.Push(),
+                            linelayout.append([sg.Text(str(PlanCount)+'. '+text,font=('微软雅黑 12')),sg.Push(),
                             sg.Button(tooltip='完成',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/done.png',key='w'+str(num)),
                             sg.Button(tooltip='查看',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/menu.png',key='c'+str(num))])
                             linelayout.append([sg.Text(note(et),font=('微软雅黑 8'))])
                         layout.append(linelayout)
                     else:
                         #未设定时间任务
-                        layout.append([sg.Text(str(No_num+1)+'. '+text,font=('微软雅黑 12')),sg.Push(),
+                        layout.append([sg.Text(str(PlanCount)+'. '+text,font=('微软雅黑 12')),sg.Push(),
                         sg.Button(tooltip='完成',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/done.png',key='w'+str(num)),
                         sg.Button(tooltip='查看',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/menu.png',key='c'+str(num))])
-                    No_num+=1
-                    if No_num==10:
+                    PlanCount+=1
+                    if PlanCount==11:
                         layout.append([sg.Text('目前仅显示10个任务',justification='center',font=('微软雅黑 12'))])
                         break
-                    show_plan_num=1
-                a+=1
-            if show_plan_num==0:
+                    IsAnyPlan=True
+            if not IsAnyPlan:
                 layout.append([sg.Image(filename='ico/empty-box.png')])
     except:
         layout.append([sg.Image(filename='ico/empty-box.png')])
-        num=0
     if size=='500x500':
-        if 0<=No_num<7:
-            No_num=0
+        if 0<=PlanCount<7:
+            PlanCount=0
         else:
-            No_num-=7
-        window=sg.Window('学习计划通 '+ver,layout=layout,size=(500,500+(55*No_num)),icon='ico/LOGO.ico')
+            PlanCount-=7
+        window=sg.Window('学习计划通 '+ver,layout=layout,size=(500,500+(55*PlanCount)),icon='ico/LOGO.ico')
     else:
         x,y=size.split('x')
         size=(x,y)
         window=sg.Window('学习计划通 '+ver,layout=layout,size=size,icon='ico/LOGO.ico')
+    #事件部分
     while True:
         event,value=window.Read()
-        print('主页面输出: ',event)
+        print('[Info] 主页面输出: ',event)
         if event==sg.WIN_CLOSED:
             break
         elif event=='新任务':
@@ -212,13 +238,13 @@ def main():
             main()
             break
         elif event=='导出成Markdown文件':
-            from print import txt_to_markdown_GUI
+            from output import txt_to_markdown_GUI
             txt_to_markdown_GUI()
         elif event=='导出成PDF文件':
-            from print import txt_to_PDF_GUI
+            from output import txt_to_PDF_GUI
             txt_to_PDF_GUI()
         elif event=='导出任务总清单为xlsx文件':
-            from print import plan_log
+            from output import plan_log
             from tool import progress
             P = progress()
             P.new()
@@ -375,7 +401,7 @@ def main():
             detail_info=sg.Window('任务详情',layout,icon='ico/LOGO.ico')
             event,value=detail_info.Read()
             detail_info.Close()
-            print(event)
+            print('[Info] 任务详情输出: ',event)
             if not event in (sg.WIN_CLOSED,'返回',None):
                 if event=='更改':
                     change_plan(str(tasknum))

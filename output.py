@@ -1,9 +1,15 @@
+'''
+导出任务列表
+'''
 import pdfkit,os,subprocess
 from markdown import markdown
 import PySimpleGUI as sg
 from plan_manager import *
 
-def wkhtmltox_check():
+def wkhtmltox_check() -> None:
+    '''
+    检查是否存在 wkhtmltox
+    '''
     try:
         os.chdir('wkhtmltox')
         os.chdir('..')
@@ -41,6 +47,12 @@ def wkhtmltox_check():
             return False
 
 def markdown_to_pdf(file_path):
+    '''
+    将Markdown文件转换为PDF文件
+
+    Args:
+        file_path (str): Markdown文件路径
+    '''
     input_filename = file_path.replace('pdf','md')
     output_filename = file_path
     with open(input_filename, encoding='utf-8') as f:
@@ -51,6 +63,13 @@ def markdown_to_pdf(file_path):
     pdfkit.from_string(html, output_filename, configuration=configuration, options={'encoding': 'utf-8'})  # HTML转PDF
 
 def txt_to_markdown(sub,File_path):
+    '''
+    导出任务列表为Markdown文件
+
+    Args:
+        sub (str): 导出范围
+        File_path (str): 导出路径
+    '''
     text_name=read_plan_with_setting(sub)
     text=''
     if text_name==[]:
@@ -79,6 +98,9 @@ def txt_to_markdown(sub,File_path):
     return None
 
 def txt_to_markdown_GUI():
+    '''
+    导出为Markdown界面
+    '''
     wkhtmltox_check()
     layout=[
         [sg.Text('选择您所导出的任务范围:',font=('微软雅黑 10')),sg.InputCombo(['全部','按科目-语文','按科目-数学','按科目-英语','按科目-物理','按科目-化学','按科目-生物','按科目-地理','按科目-历史','按科目-政治','按科目-体育','按分类-生活','按时间-当天','按时间-当周'],font=('微软雅黑 10'),size=(10,5))],
@@ -104,7 +126,6 @@ def txt_to_markdown_GUI():
     ]
     done_window=sg.Window('导出完成',layout=layout,icon='ico/LOGO.ico',font=('微软雅黑 10'))
     event=done_window.Read()
-    print(File_path)
     if event[0]=='打开文件':
         from tool import open_file_tip
         Twindow = open_file_tip()      
@@ -118,6 +139,9 @@ def txt_to_markdown_GUI():
     return None
 
 def txt_to_PDF_GUI():
+    '''
+    导出为PDF界面
+    '''
     if not wkhtmltox_check():
         return None
     layout=[
@@ -158,6 +182,7 @@ def txt_to_PDF_GUI():
     done_window.Close()
     return None
 
+# 一个用于导出任务记录的类
 class plan_log:
     def check_value(value):
         if value==None:
@@ -179,7 +204,6 @@ class plan_log:
         import sys,os
         path=os.getenv('APPDATA')+'\Study to do'
         file_path=(path+'\data\Plan_log.xlsx')
-        print(file_path)
         layout=[
             [sg.Text('导出成功, 请到{}查看'.format(file_path))],
             [sg.Button('打开'),sg.Button('打开文件夹'),sg.Push(),sg.Button(tooltip='返回',button_color=(sg.theme_background_color(), sg.theme_background_color()),border_width=0,image_filename='ico/back.png',key='返回')]

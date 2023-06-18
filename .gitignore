@@ -1,4 +1,6 @@
 dist/
 build/
 __pycache__/
+data/cookie.json
 *.spec
+.gitignore
